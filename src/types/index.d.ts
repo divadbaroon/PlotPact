@@ -5,3 +5,9 @@ export interface Message {
   content: string;
   sender: MessageSender;
 }
+
+export interface ExpandingCardProps {
+  title: string
+  description: string
+  image: string
+}
