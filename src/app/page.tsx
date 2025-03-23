@@ -1,160 +1,30 @@
-"use client"
+import ExpandingCard from "@/components/ExpandingCard"
 
-import React, { useState } from 'react';
+const cards = [
+  {
+    title: "Story 1",
+    description:
+      "This is a longer description for Card 1. It contains more text to demonstrate the expanding effect when hovering over the card. You'll see the full content overlaying the image without causing any layout shifts. The card maintains its original size, but the content expands upwards.",
+    image: "/placeholder.svg?height=200&width=400",
+  },
+  {
+    title: "Story 2",
+    description:
+      "Card 2 also has a detailed description. When you hover over this card, you'll be able to read all of this text without disturbing the layout of other cards on the page. This demonstrates how we can show more content by overlaying it on top of the image.",
+    image: "/placeholder.svg?height=200&width=400",
+  }
+]
 
-import { Message } from "@/types"
- 
-/**
- * Provides an interactive story interface where users
- * can contribute text that gets added to a continuous narrative.
- * As well as a configuration panel on the right hand side.
- */
-const ChatInterface: React.FC = () => {
-  // Stores all message contributions to the story
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  // Manages the current input value in the text field
-  const [inputValue, setInputValue] = useState<string>('');
-
-  // Controlles the visibility of the right configuration panel
-  const [panelOpen, setPanelOpen] = useState<boolean>(true);
-
-  /**
-   * Handles form submission when user adds text to the story
-   */
-  const handleSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
-    
-    if (inputValue.trim()) {
-      // Add user message to the story
-      setMessages([...messages, { 
-        id: Date.now(),
-        content: inputValue,
-        sender: 'user'
-      }]);
-      
-      // Clear input field
-      setInputValue('');
-    }
-  };
-
-  /**
-   * Updates the input state as the user types
-   */
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setInputValue(e.target.value);
-  };
-
-  /**
-   * Toggles the visibility of the configuration panel
-   */
-  const togglePanel = (): void => {
-    setPanelOpen(!panelOpen);
-  };
-
-  /**
-   * Clears all story messages and resets to an empty story
-   */
-  const clearHistory = (): void => {
-    setMessages([]);
-  };
-
-  // Combine all messages into a continuous story
-  const storyText = messages.map(msg => msg.content).join(' ');
-
+export default function Home() {
   return (
-    <div className="flex h-screen bg-white">
-      {/* Main Story Area */}
-      <div className="flex-1 flex flex-col border-r border-gray-200">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-black">Interactive Story</h1>
-          <button 
-            onClick={togglePanel}
-            className="text-gray-600"
-          >
-            ☰
-          </button>
-        </header>
-
-        {/* Story Text */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="prose max-w-none">
-            {storyText ? (
-              <p className="text-black">{storyText}</p>
-            ) : (
-              <p className="text-gray-600">Your story will appear here. Start typing to begin...</p>
-            )}
-          </div>
-        </div>
-
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
-          <div className="flex items-center">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder="Continue the story..."
-              className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-gray-500 text-black"
-            />
-          </div>
-        </form>
+    <main className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Stories</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {cards.map((card, index) => (
+          <ExpandingCard key={index} title={card.title} description={card.description} image={card.image} />
+        ))}
       </div>
+    </main>
+  )
+}
 
-      {/* Right Panel */}
-      <div className={`${panelOpen ? 'w-64' : 'w-0'} bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}>
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4 text-black">Configuration</h2>
-          
-          <div className="space-y-6">
-            {/* AI Settings (for future use) */}
-            <div>
-              <h3 className="font-medium mb-2 text-black">AI Settings</h3>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input type="checkbox" id="enableAI" className="mr-2" />
-                  <label htmlFor="enableAI" className="text-sm text-black">Enable AI Contributions</label>
-                </div>
-                
-                <div>
-                  <label className="block text-sm mb-1 text-black">AI Creativity</label>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="10" 
-                    step="1" 
-                    defaultValue="7"
-                    className="w-full" 
-                    disabled
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Story Management */}
-            <div>
-              <h3 className="font-medium mb-2 text-black">Story Management</h3>
-              <div className="space-y-2">
-                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
-                  Save Story
-                </button>
-                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
-                  Load Story
-                </button>
-                <button 
-                  onClick={clearHistory}
-                  className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900"
-                >
-                  Clear Story
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ChatInterface;
