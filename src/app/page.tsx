@@ -1,17 +1,19 @@
 import ExpandingCard from "@/components/ExpandingCard"
 
+import earhart from "../../public/story-images/earhart.jpg"
+
 const cards = [
   {
     title: "Story 1",
     description:
-      "This is a longer description for Card 1. It contains more text to demonstrate the expanding effect when hovering over the card. You'll see the full content overlaying the image without causing any layout shifts. The card maintains its original size, but the content expands upwards.",
+      "Fiction.",
     image: "/placeholder.svg?height=200&width=400",
   },
   {
-    title: "Story 2",
+    title: "Wings Across the World: Amelia Earhart's Final Adventure",
     description:
-      "Card 2 also has a detailed description. When you hover over this card, you'll be able to read all of this text without disturbing the layout of other cards on the page. This demonstrates how we can show more content by overlaying it on top of the image.",
-    image: "/placeholder.svg?height=200&width=400",
+      "Join Amelia Earhart on her daring 1937 attempt to circumnavigate the globe, from the Americas to South America, Africa, India, and finally to Lae, New Guinea. Experience the courage and determination that made her an aviation pioneer as she faces the challenges that would lead to one of history's greatest unsolved mysteries.",
+    image: earhart,
   }
 ]
 
