@@ -1,103 +1,160 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import React, { useState } from 'react';
+
+import { Message } from "@/types"
+ 
+/**
+ * Provides an interactive story interface where users
+ * can contribute text that gets added to a continuous narrative.
+ * As well as a configuration panel on the right hand side.
+ */
+const ChatInterface: React.FC = () => {
+  // Stores all message contributions to the story
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // Manages the current input value in the text field
+  const [inputValue, setInputValue] = useState<string>('');
+
+  // Controlles the visibility of the right configuration panel
+  const [panelOpen, setPanelOpen] = useState<boolean>(true);
+
+  /**
+   * Handles form submission when user adds text to the story
+   */
+  const handleSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    
+    if (inputValue.trim()) {
+      // Add user message to the story
+      setMessages([...messages, { 
+        id: Date.now(),
+        content: inputValue,
+        sender: 'user'
+      }]);
+      
+      // Clear input field
+      setInputValue('');
+    }
+  };
+
+  /**
+   * Updates the input state as the user types
+   */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setInputValue(e.target.value);
+  };
+
+  /**
+   * Toggles the visibility of the configuration panel
+   */
+  const togglePanel = (): void => {
+    setPanelOpen(!panelOpen);
+  };
+
+  /**
+   * Clears all story messages and resets to an empty story
+   */
+  const clearHistory = (): void => {
+    setMessages([]);
+  };
+
+  // Combine all messages into a continuous story
+  const storyText = messages.map(msg => msg.content).join(' ');
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex h-screen bg-white">
+      {/* Main Story Area */}
+      <div className="flex-1 flex flex-col border-r border-gray-200">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-black">Interactive Story</h1>
+          <button 
+            onClick={togglePanel}
+            className="text-gray-600"
+          >
+            ☰
+          </button>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Story Text */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="prose max-w-none">
+            {storyText ? (
+              <p className="text-black">{storyText}</p>
+            ) : (
+              <p className="text-gray-600">Your story will appear here. Start typing to begin...</p>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Input Form */}
+        <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
+          <div className="flex items-center">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder="Continue the story..."
+              className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-gray-500 text-black"
+            />
+          </div>
+        </form>
+      </div>
+
+      {/* Right Panel */}
+      <div className={`${panelOpen ? 'w-64' : 'w-0'} bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}>
+        <div className="p-4">
+          <h2 className="text-xl font-bold mb-4 text-black">Configuration</h2>
+          
+          <div className="space-y-6">
+            {/* AI Settings (for future use) */}
+            <div>
+              <h3 className="font-medium mb-2 text-black">AI Settings</h3>
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <input type="checkbox" id="enableAI" className="mr-2" />
+                  <label htmlFor="enableAI" className="text-sm text-black">Enable AI Contributions</label>
+                </div>
+                
+                <div>
+                  <label className="block text-sm mb-1 text-black">AI Creativity</label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="10" 
+                    step="1" 
+                    defaultValue="7"
+                    className="w-full" 
+                    disabled
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Story Management */}
+            <div>
+              <h3 className="font-medium mb-2 text-black">Story Management</h3>
+              <div className="space-y-2">
+                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
+                  Save Story
+                </button>
+                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
+                  Load Story
+                </button>
+                <button 
+                  onClick={clearHistory}
+                  className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900"
+                >
+                  Clear Story
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default ChatInterface;
