@@ -1,13 +1,14 @@
 import ExpandingCard from "@/components/ExpandingCard"
 
 import earhart from "../../public/story-images/earhart.jpg"
+import knight from "../../public/story-images/knight.jpg"
 
 const cards = [
   {
-    title: "Story 1",
+    title: "The Last Shield: A Knight's Stand",
     description:
-      "Fiction.",
-    image: "/placeholder.svg?height=200&width=400",
+      "When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir Brannen takes up his rusted armor for one final battle to protect the only home he's ever known. Experience the journey of a broken hero who must rediscover his courage as he devises a desperate plan against impossible odds, risking everything in a confrontation that will determine the fate of everyone he holds dear.",
+    image: knight,
   },
   {
     title: "Wings Across the World: Amelia Earhart's Final Adventure",
