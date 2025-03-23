@@ -9,5 +9,5 @@ export interface Message {
 export interface ExpandingCardProps {
   title: string
   description: string
-  image: string
+  image: string | StaticImageData
 }
