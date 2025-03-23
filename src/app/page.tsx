@@ -7,7 +7,7 @@ const cards = [
   {
     title: "The Last Shield: A Knight's Stand",
     description:
-      "When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir Brannen takes up his rusted armor for one final battle to protect the only home he's ever known. Experience the journey of a broken hero who must rediscover his courage as he devises a desperate plan against impossible odds, risking everything in a confrontation that will determine the fate of everyone he holds dear.",
+      "When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir Brannen takes up his rusted armor for one final battle to protect his home. Experience the journey of a broken hero who must rediscover his courage as he confronts impossible odds, devising a desperate plan that will determine the fate of everyone he holds dear.",
     image: knight,
   },
   {
