@@ -11,3 +11,9 @@ export interface ExpandingCardProps {
   description: string
   image: string | StaticImageData
 }
+
+export interface Choice {
+  description: string;
+  options: string[];
+  selected?: string;
+}
