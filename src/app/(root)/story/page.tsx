@@ -1,60 +1,80 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Message, Choice } from "@/types";
-import MultipleChoiceBox from "@/components/MultipleChoiceBox";
+import React, { useEffect, useState } from 'react';
+// import { Message, Choice } from '@/types';
+import MultipleChoiceBox from '@/components/MultipleChoiceBox';
 
-/**
- * Provides an interactive story interface where users
- * can contribute text that gets added to a continuous narrative.
- * Includes a configuration panel on the right-hand side.
- */
+import { startChat } from '@/app/actions/startChat';
+import { sendAnswer } from '@/app/actions/sendAnswer';
+
 const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState<string>("");
+  // const [messages, setMessages] = useState<Message[]>([]);
+
   const [panelOpen, setPanelOpen] = useState<boolean>(true);
-  const [choiceData, setChoiceData] = useState<Choice | null>(null);
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
-    if (inputValue.trim()) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          content: inputValue,
-          sender: "user",
-        },
-      ]);
-      setInputValue("");
-    }
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [accumulatedText, setAccumulatedText] = useState<string>('');
+  const [question, setQuestion] = useState<string | null>(null);
+  const [choices, setChoices] = useState<string[]>([]);
+  const [selectedChoice, setSelectedChoice] = useState<string>('');
+  const [eos, setEos] = useState<boolean>(false);
+  const [isIncorrect, setIsIncorrect] = useState<boolean>(false);
 
-    // Add choices
-    setChoiceData({
-      description: "Choose how the story continues:",
-      options: [
-        "Option 1: The hero fights bravely",
-        "Option 2: The hero runs away",
-        "Option 3: The hero finds an ally",
-      ],
-    });
-  };
+  useEffect(() => {
+    const initChat = async () => {
+      try {
+        // const res = await fetch('http://localhost:4000/api/start', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        // });
 
-  // Handle choice selection
-  const handleChoiceSubmit = (selectedChoice: string) => {
-    const aiMessage: Message = {
-      id: Date.now(),
-      content: `You chose: ${selectedChoice}`,
-      sender: "ai",
+        // const data = await res.json();
+
+        const data = await startChat();
+
+        setChatId(data.chatId);
+        if (data.para) {
+          setAccumulatedText((prev) => prev + data.para);
+        }
+        setQuestion(data.question);
+        setChoices(data.choices);
+        setEos(data.eos);
+        setIsIncorrect(false);
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+      }
     };
-    setMessages((prev) => [...prev, aiMessage]);
-    setChoiceData(null); // Clear choice box after submission
-  };
 
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setInputValue(e.target.value);
+    initChat();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!selectedChoice || !chatId || eos) return;
+
+    try {
+      // const res = await fetch('http://localhost:4000/api/chat', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ chatId, answer: selectedChoice }),
+      // });
+      // const data = await res.json();
+
+      const data = await sendAnswer(chatId, selectedChoice);
+
+      if (data.para) {
+        setAccumulatedText((prev) => prev + data.para);
+        setIsIncorrect(false);
+      } else {
+        setIsIncorrect(true);
+      }
+
+      setQuestion(data.question);
+      setChoices(data.choices);
+      setEos(data.eos);
+      setSelectedChoice('');
+    } catch (error) {
+      console.error('Error sending answer:', error);
+    }
   };
 
   // Toggle configuration panel
@@ -62,93 +82,102 @@ const ChatInterface: React.FC = () => {
     setPanelOpen(!panelOpen);
   };
 
-  // Clear story history
-  const clearHistory = (): void => {
-    setMessages([]);
-  };
+  // // Clear story history
+  // const clearHistory = (): void => {
+  //   setMessages([]);
+  // };
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Main Story Area */}
-      <div className="flex-1 flex flex-col border-r border-gray-200">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-black">Interactive Story</h1>
-          <button onClick={togglePanel} className="text-gray-600">
+    <div className='flex h-screen bg-white'>
+      <div className='flex-1 flex flex-col border-r border-gray-200'>
+        <header className='bg-white border-b border-gray-200 p-4 flex items-center justify-between'>
+          <h1 className='text-xl font-bold text-black'>Interactive Story</h1>
+          <button onClick={togglePanel} className='text-gray-600'>
             ☰
           </button>
         </header>
 
-        {/* Story Display */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="prose max-w-none">
-            {messages.length > 0 ? (
-              messages.map((msg) => (
-                <p
-                  key={msg.id}
-                  className={`text-${msg.sender === "user" ? "black" : "blue-600"}`}
-                >
-                  {msg.content}
-                </p>
-              ))
-            ) : (
-              <p className="text-gray-600">
-                Your story will appear here. Start typing to begin...
-              </p>
-            )}
+        <div className='flex-1 overflow-y-auto p-4'>
+          <div className='prose max-w-none'>
+            <p className='text-gray-900'>
+              {accumulatedText || 'Waiting for content...'}
+              <br />
+            </p>
           </div>
 
-          {/* Choice Box */}
-          {choiceData && (
+          {!eos && question && (
             <MultipleChoiceBox
-              description={choiceData.description}
-              choices={choiceData.options}
-              onSubmit={handleChoiceSubmit}
+              description={question}
+              choices={choices}
+              onSubmit={handleSubmit}
+              selectedChoice={selectedChoice}
+              setSelectedChoice={setSelectedChoice}
+              isIncorrect={isIncorrect}
             />
+          )}
+
+          {eos && (
+            <p className='text-gray-900'>
+              {eos}
+              <br /> ✅ Story completed.
+            </p>
           )}
         </div>
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-200">
-          <div className="flex items-center">
+        {/* <form
+          onSubmit={handleSubmit}
+          className='p-4 bg-white border-t border-gray-200'
+        >
+          <div className='flex items-center'>
             <input
-              type="text"
+              type='text'
               value={inputValue}
               onChange={handleInputChange}
-              placeholder="Continue the story..."
-              className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-gray-500 text-black"
+              placeholder='Continue the story...'
+              className='flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-gray-500 text-black'
             />
-            <button type="submit" className="p-2 bg-blue-500 text-white rounded-r hover:bg-blue-600">
+            <button
+              type='submit'
+              className='p-2 bg-blue-500 text-white rounded-r hover:bg-blue-600'
+            >
               Send
             </button>
           </div>
-        </form>
+        </form> */}
       </div>
 
       {/* Right Configuration Panel */}
-      <div className={`${panelOpen ? "w-64" : "w-0"} bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}>
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4 text-black">Configuration</h2>
+      <div
+        className={`${
+          panelOpen ? 'w-64' : 'w-0'
+        } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
+      >
+        <div className='p-4'>
+          <h2 className='text-xl font-bold mb-4 text-black'>Configuration</h2>
 
-          <div className="space-y-6">
+          <div className='space-y-6'>
             {/* AI Settings */}
             <div>
-              <h3 className="font-medium mb-2 text-black">AI Settings</h3>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input type="checkbox" id="enableAI" className="mr-2" />
-                  <label htmlFor="enableAI" className="text-sm text-black">Enable AI Contributions</label>
+              <h3 className='font-medium mb-2 text-black'>AI Settings</h3>
+              <div className='space-y-3'>
+                <div className='flex items-center'>
+                  <input type='checkbox' id='enableAI' className='mr-2' />
+                  <label htmlFor='enableAI' className='text-sm text-black'>
+                    Enable AI Contributions
+                  </label>
                 </div>
 
                 <div>
-                  <label className="block text-sm mb-1 text-black">AI Creativity</label>
+                  <label className='block text-sm mb-1 text-black'>
+                    AI Creativity
+                  </label>
                   <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="1"
-                    defaultValue="7"
-                    className="w-full"
+                    type='range'
+                    min='0'
+                    max='10'
+                    step='1'
+                    defaultValue='7'
+                    className='w-full'
                     disabled
                   />
                 </div>
@@ -157,20 +186,21 @@ const ChatInterface: React.FC = () => {
 
             {/* Story Management */}
             <div>
-              <h3 className="font-medium mb-2 text-black">Story Management</h3>
-              <div className="space-y-2">
-                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
+              <h3 className='font-medium mb-2 text-black'>Story Management</h3>
+              <div className='space-y-3'>
+                <button className='w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900'>
                   Save Story
                 </button>
-                <button className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100">
-                  Load Story
+                <button className='w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900 mt-auto'>
+                  Generate Report
                 </button>
-                <button
-                  onClick={clearHistory}
-                  className="w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900"
+
+                {/* <button
+                  // onClick={clearHistory}
+                  className='w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900'
                 >
                   Clear Story
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
