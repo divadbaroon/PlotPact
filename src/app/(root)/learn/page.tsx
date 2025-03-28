@@ -16,6 +16,8 @@ const ChatInterface: React.FC = () => {
   const [question, setQuestion] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
   const [selectedChoice, setSelectedChoice] = useState<string>('');
+  const [customAnswer, setCustomAnswer] = useState<string>('');
+  const [useCustomAnswer, setUseCustomAnswer] = useState<boolean>(false);
   const [eos, setEos] = useState<boolean>(false);
   const [isIncorrect, setIsIncorrect] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -50,13 +52,6 @@ const ChatInterface: React.FC = () => {
       try {
         setLoading(true);
 
-        // const res = await fetch('http://localhost:4000/api/start', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        // });
-
-        // const data = await res.json();
-
         const data = await startChat();
 
         setChatId(data.chatId);
@@ -77,22 +72,16 @@ const ChatInterface: React.FC = () => {
   }, []);
 
   const handleSubmit = async () => {
-    if (!selectedChoice || !chatId || eos) return;
+    if ((!selectedChoice && !useCustomAnswer) || (!customAnswer && useCustomAnswer) || !chatId || eos) return;
 
     setLoading(true);
 
     try {
-      // const res = await fetch('http://localhost:4000/api/chat', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ chatId, answer: selectedChoice }),
-      // });
-      // const data = await res.json();
-
-      const data = await sendAnswer(chatId, selectedChoice);
+      const answerToSend = useCustomAnswer ? JSON.stringify({ text: customAnswer }) : selectedChoice;
+      
+      const data = await sendAnswer(chatId, answerToSend);
 
       if (data.para) {
-        // setAccumulatedText((prev) => prev + data.para);
         streamText(data.para);
         setIsIncorrect(false);
       } else {
@@ -103,9 +92,12 @@ const ChatInterface: React.FC = () => {
       setChoices(data.choices);
       setEos(data.eos);
       setSelectedChoice('');
+      setCustomAnswer('');
       setLoading(false);
     } catch (error) {
       console.error('Error sending answer:', error);
+      setIsIncorrect(true);
+      setLoading(false);
     }
   };
 
@@ -114,10 +106,13 @@ const ChatInterface: React.FC = () => {
     setPanelOpen(!panelOpen);
   };
 
-  // // Clear story history
-  // const clearHistory = (): void => {
-  //   setMessages([]);
-  // };
+  // Toggle between multiple choice and custom answer
+  const toggleAnswerType = (): void => {
+    setUseCustomAnswer(!useCustomAnswer);
+    setSelectedChoice('');
+    setCustomAnswer('');
+    setIsIncorrect(false);
+  };
 
   return (
     <div>
@@ -182,14 +177,73 @@ const ChatInterface: React.FC = () => {
             )}
 
             {!eos && question && !isStreaming && (
-              <MultipleChoiceBox
-                description={question}
-                choices={choices}
-                onSubmit={handleSubmit}
-                selectedChoice={selectedChoice}
-                setSelectedChoice={setSelectedChoice}
-                isIncorrect={isIncorrect}
-              />
+              <div className="mb-4">
+                <div className="mb-4 flex items-center gap-4 justify-center">
+                  <button
+                    onClick={toggleAnswerType}
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      !useCustomAnswer 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    Multiple Choice
+                  </button>
+                  <button
+                    onClick={toggleAnswerType}
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      useCustomAnswer 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    Custom Answer
+                  </button>
+                </div>
+
+                {!useCustomAnswer ? (
+                  <MultipleChoiceBox
+                    description={question}
+                    choices={choices}
+                    onSubmit={handleSubmit}
+                    selectedChoice={selectedChoice}
+                    setSelectedChoice={setSelectedChoice}
+                    isIncorrect={isIncorrect}
+                  />
+                ) : (
+                  // Custom Answer Input
+                  <div className="border rounded-lg p-4 shadow-sm bg-gray-50">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">{question}</h2>
+                    <div className="mt-2">
+                      <textarea
+                        value={customAnswer}
+                        onChange={(e) => setCustomAnswer(e.target.value)}
+                        placeholder="Type your own answer here..."
+                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        rows={4}
+                      ></textarea>
+                    </div>
+
+                    {isIncorrect && (
+                      <p className="text-red-500 mt-2">
+                        That doesn't seem right. Try again!
+                      </p>
+                    )}
+
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!customAnswer}
+                      className={`mt-4 px-4 py-2 rounded-lg font-medium ${
+                        !customAnswer
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      Submit Answer
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {eos && (
@@ -253,13 +307,6 @@ const ChatInterface: React.FC = () => {
                   <button className='w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900 mt-auto'>
                     Generate Report
                   </button>
-
-                  {/* <button
-                  // onClick={clearHistory}
-                  className='w-full p-2 border border-gray-300 rounded hover:bg-gray-100 text-gray-900'
-                >
-                  Clear Story
-                </button> */}
                 </div>
               </div>
             </div>
