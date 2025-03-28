@@ -208,7 +208,7 @@ const ChatInterface: React.FC = () => {
                   </button>
                 </div>
 
-                {!useCustomAnswer ? (
+                {!useCustomAnswer && !loading ? (
                   <MultipleChoiceBox
                     description={question}
                     storyMode={false}
