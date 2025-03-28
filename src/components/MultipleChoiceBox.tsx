@@ -15,10 +15,10 @@ const MultipleChoiceBox: React.FC<MultipleChoiceBoxProps> = ({
   onSubmit,
   setSelectedChoice,
   selectedChoice,
-  isIncorrect
+  isIncorrect,
 }) => {
   return (
-    <div className='border border-gray-300 p-4 rounded-lg shadow-md bg-white mt-4'>
+    <div className='p-4 bg-gray-50 mt-4 animate-fade-in-left'>
       {isIncorrect && (
         <div className='flex items-center text-red-600 text-sm gap-2 font-medium'>
           <span>❌</span>

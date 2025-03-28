@@ -10,6 +10,7 @@ export interface ExpandingCardProps {
   title: string
   description: string
   image: string | StaticImageData
+  link: string
 }
 
 export interface Choice {

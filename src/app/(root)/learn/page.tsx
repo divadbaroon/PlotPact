@@ -7,10 +7,7 @@ import MultipleChoiceBox from '@/components/MultipleChoiceBox';
 import { startChat } from '@/app/actions/startChat';
 import { sendAnswer } from '@/app/actions/sendAnswer';
 
-type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
-
 const ChatInterface: React.FC = () => {
-  // const [messages, setMessages] = useState<Message[]>([]);
 
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
 
@@ -22,9 +19,6 @@ const ChatInterface: React.FC = () => {
   const [eos, setEos] = useState<boolean>(false);
   const [isIncorrect, setIsIncorrect] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [mode, setMode] = useState<InteractionMode>('idle');
-  const [customInput, setCustomInput] = useState('');
 
   const [paras, setParas] = useState<string[]>([]);
   const [streamingPara, setStreamingPara] = useState<string>('');
@@ -56,7 +50,15 @@ const ChatInterface: React.FC = () => {
       try {
         setLoading(true);
 
+        // const res = await fetch('http://localhost:4000/api/start', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        // });
+
+        // const data = await res.json();
+
         const data = await startChat();
+
         setChatId(data.chatId);
 
         if (data.para) streamText(data.para);
@@ -74,15 +76,23 @@ const ChatInterface: React.FC = () => {
     initChat();
   }, []);
 
-  const handleSubmit = async (input: string) => {
-    if (!input || !chatId || eos) return;
+  const handleSubmit = async () => {
+    if (!selectedChoice || !chatId || eos) return;
 
     setLoading(true);
 
     try {
+      // const res = await fetch('http://localhost:4000/api/chat', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ chatId, answer: selectedChoice }),
+      // });
+      // const data = await res.json();
+
       const data = await sendAnswer(chatId, selectedChoice);
 
       if (data.para) {
+        // setAccumulatedText((prev) => prev + data.para);
         streamText(data.para);
         setIsIncorrect(false);
       } else {
@@ -93,12 +103,6 @@ const ChatInterface: React.FC = () => {
       setChoices(data.choices);
       setEos(data.eos);
       setSelectedChoice('');
-      setCustomInput('');
-
-      if (!isIncorrect) {
-        setMode('idle');
-      }
-
       setLoading(false);
     } catch (error) {
       console.error('Error sending answer:', error);
@@ -133,7 +137,7 @@ const ChatInterface: React.FC = () => {
 
             <div className='w-2/3 h-[40vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
               <img
-                src='/story-images/knight.jpg'
+                src='/story-images/apollo13.JPG'
                 alt='Chat Banner'
                 className='object-cover w-full h-full'
               />
@@ -177,63 +181,15 @@ const ChatInterface: React.FC = () => {
               </div>
             )}
 
-            {!eos && !isStreaming && !loading && paras[0] && (
-              <div className='mt-5'>
-                <div className='flex gap-4'>
-                  <button
-                    onClick={() => handleSubmit('continue the story')}
-                    className='border border-gray-200 bg-gray-50 text-gray-800 px-4 py-2 rounded hover:bg-gray-200'
-                  >
-                    Continue
-                  </button>
-                  <button
-                    onClick={() => setMode('multipleChoice')}
-                    className='border border-gray-200 bg-gray-50 text-gray-800 px-4 py-2 rounded hover:bg-gray-200'
-                  >
-                    Show Options
-                  </button>
-                  <button
-                    onClick={() => setMode('freeform')}
-                    className='border border-gray-200 bg-gray-50 text-gray-800 px-4 py-2 rounded hover:bg-gray-200'
-                  >
-                    Type
-                  </button>
-                </div>
-                {mode === 'multipleChoice' && question && (
-                  <MultipleChoiceBox
-                    description={question}
-                    choices={choices}
-                    onSubmit={() => handleSubmit(selectedChoice)}
-                    selectedChoice={selectedChoice}
-                    setSelectedChoice={setSelectedChoice}
-                    isIncorrect={isIncorrect}
-                  />
-                )}
-
-                {mode === 'freeform' && (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSubmit(customInput);
-                    }}
-                    className='flex gap-2 mt-5'
-                  >
-                    <input
-                      type='text'
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      placeholder='Continue the story...'
-                      className='flex-1 p-2 border border-gray-300 rounded text-black focus:outline-none focus:ring-1 focus:ring-gray-500'
-                    />
-                    <button
-                      type='submit'
-                      className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
-                    >
-                      Send
-                    </button>
-                  </form>
-                )}
-              </div>
+            {!eos && question && !isStreaming && (
+              <MultipleChoiceBox
+                description={question}
+                choices={choices}
+                onSubmit={handleSubmit}
+                selectedChoice={selectedChoice}
+                setSelectedChoice={setSelectedChoice}
+                isIncorrect={isIncorrect}
+              />
             )}
 
             {eos && (
