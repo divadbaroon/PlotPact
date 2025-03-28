@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 // import { Message, Choice } from '@/types';
 import MultipleChoiceBox from '@/components/MultipleChoiceBox';
 
-import { startChat } from '@/app/actions/startChat';
+import { startChatStory } from '@/app/actions/startChat';
 import { sendAnswer } from '@/app/actions/sendAnswer';
 
 type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
@@ -56,7 +56,7 @@ const ChatInterface: React.FC = () => {
       try {
         setLoading(true);
 
-        const data = await startChat();
+        const data = await startChatStory();
         setChatId(data.chatId);
 
         if (data.para) streamText(data.para);
@@ -128,10 +128,10 @@ const ChatInterface: React.FC = () => {
 
           <div className='flex-1 overflow-y-auto p-4'>
             <h1 className='text-4xl font-bold text-center mb-5 text-gray-800'>
-              The Apollo 13 Mission
+              The Last Shield: A Knight's Stand
             </h1>
 
-            <div className='w-2/3 h-[40vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
+            <div className='w-2/3 h-[35vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
               <img
                 src='/story-images/knight.jpg'
                 alt='Chat Banner'
@@ -199,9 +199,10 @@ const ChatInterface: React.FC = () => {
                     Type
                   </button>
                 </div>
-                {mode === 'multipleChoice' && question && (
+                {mode === 'multipleChoice' && (
                   <MultipleChoiceBox
-                    description={question}
+                    description={'Story mode'}
+                    storyMode={true}
                     choices={choices}
                     onSubmit={() => handleSubmit(selectedChoice)}
                     selectedChoice={selectedChoice}

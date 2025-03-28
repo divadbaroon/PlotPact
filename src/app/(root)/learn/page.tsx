@@ -135,7 +135,7 @@ const ChatInterface: React.FC = () => {
               The Apollo 13 Mission
             </h1>
 
-            <div className='w-2/3 h-[40vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
+            <div className='w-2/3 h-[35vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
               <img
                 src='/story-images/apollo13.JPG'
                 alt='Chat Banner'
@@ -184,6 +184,7 @@ const ChatInterface: React.FC = () => {
             {!eos && question && !isStreaming && (
               <MultipleChoiceBox
                 description={question}
+                storyMode={false}
                 choices={choices}
                 onSubmit={handleSubmit}
                 selectedChoice={selectedChoice}
