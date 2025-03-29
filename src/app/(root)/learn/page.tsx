@@ -25,20 +25,36 @@ const ChatInterface: React.FC = () => {
   const [streamingPara, setStreamingPara] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState(false);
 
+  
   const streamText = (text: string) => {
+    // Clear any existing streaming text and set streaming state
     setStreamingPara('');
     setIsStreaming(true);
-    let i = 0;
-    const interval = setInterval(() => {
-      setStreamingPara((prev) => prev + text[i]);
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        setParas((prev) => [...prev, text]);
-        setStreamingPara('');
-        setIsStreaming(false);
-      }
-    }, 20); // typing speed (ms per char)
+    
+    // Split the text into words
+    const words = text.split(/\s+/);
+    let currentWordIndex = 0;
+    
+    // Add small initial delay before streaming starts
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        // Add the next word (with a space if not the first word)
+        const prefix = currentWordIndex > 0 ? ' ' : '';
+        setStreamingPara((prev) => prev + prefix + words[currentWordIndex]);
+        
+        currentWordIndex++;
+        
+        // Check if we're done streaming all words
+        if (currentWordIndex >= words.length) {
+          clearInterval(interval);
+          
+          // Add the complete paragraph to the paragraphs array
+          setParas((prev) => [...prev, text]);
+          setStreamingPara('');
+          setIsStreaming(false);
+        }
+      }, 100); // Time per word (ms) 
+    }, 300); // Initial delay before streaming starts (ms)
   };
 
   // Scroll the page to bottom every time content grows
