@@ -1,4 +1,4 @@
-export function parseGeminiJson(raw: string): any {
+export function parseGeminiJson(raw: string) {
   const cleaned = raw
     .trim()
     .replace(/^"+|"+$/g, '')
