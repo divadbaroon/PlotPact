@@ -58,7 +58,7 @@ export default function Home() {
                 </div>
                 <div className="p-6 flex-grow">
                   <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                    The Last Shield: A Knight's Stand
+                    The Last Shield: A Knight&apos;s Stand
                   </h3>
                   <p className="text-muted-foreground">
                     When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir
@@ -92,7 +92,7 @@ export default function Home() {
                     The Apollo 13 Mission
                   </h3>
                   <p className="text-muted-foreground">
-                    Apollo 13 was NASA's seventh crewed mission in the Apollo space program, launched on April 11, 1970.
+                    Apollo 13 was NASA&apos;s seventh crewed mission in the Apollo space program, launched on April 11, 1970.
                     The spacecraft carried a crew of three astronauts: James Lovell, Jack Swigert, and Fred Haise. It
                     was intended to be the third mission to land humans on the Moon. Fate had different plans.
                   </p>
@@ -112,7 +112,7 @@ export default function Home() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">The Problem We're Solving</h2>
+            <h2 className="text-3xl font-bold mb-4">The Problem We&apos;re Solving</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               The advent of LLMs has caused many people to stop thinking about their answers and has affected their
               creativity.

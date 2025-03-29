@@ -252,7 +252,7 @@ const ChatInterface: React.FC = () => {
 
                     {isIncorrect && (
                       <p className='text-red-500 mt-2'>
-                        That doesn't seem right. Try again!
+                        That doesn&apos;t seem right. Try again!
                       </p>
                     )}
 

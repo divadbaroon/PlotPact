@@ -143,7 +143,7 @@ const ChatInterface: React.FC = () => {
 
           <div className='flex-1 overflow-y-auto p-4'>
             <h1 className='text-4xl font-bold text-center mb-5 text-gray-800'>
-              The Last Shield: A Knight's Stand
+              The Last Shield: A Knight&apos;s Stand
             </h1>
 
             <div className='w-2/3 h-[35vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
