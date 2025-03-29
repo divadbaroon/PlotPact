@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, BookOpen, Brain, Lightbulb, Sparkles, Users } from "lucide-react"
+import { ArrowRight, BookOpen, Brain, Lightbulb, Users } from "lucide-react"
 
 import apollo13 from "../../public/story-images/apollo13.jpg"
 import knight from "../../public/story-images/knight.jpg"
@@ -179,7 +179,7 @@ export default function Home() {
                   <div className="flex-shrink-0 w-full md:w-24 font-semibold text-primary">Step 1</div>
                   <div className="flex-grow">
                     <p className="font-medium">Human writes a sentence</p>
-                    <p className="text-muted-foreground mt-1">"John really wants to go scuba diving."</p>
+                    <p className="text-muted-foreground mt-1">&quot;John really wants to go scuba diving.&quot;</p>
                     <div className="mt-2 text-sm text-green-600">Accepted</div>
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export default function Home() {
                   <div className="flex-shrink-0 w-full md:w-24 font-semibold text-primary">Step 2</div>
                   <div className="flex-grow">
                     <p className="font-medium">AI writes the next sentence with a constraint</p>
-                    <p className="text-muted-foreground mt-1">"But he is afraid of deep water."</p>
+                    <p className="text-muted-foreground mt-1">&quot;But he is afraid of deep water.&quot;</p>
                     <div className="mt-2 text-sm text-green-600">Accepted with constraint enforced</div>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function Home() {
                   <div className="flex-shrink-0 w-full md:w-24 font-semibold text-primary">Step 3</div>
                   <div className="flex-grow">
                     <p className="font-medium">Human attempts to continue the story</p>
-                    <p className="text-muted-foreground mt-1">"One day he was swimming in Lake Ontario."</p>
+                    <p className="text-muted-foreground mt-1">&quot;One day he was swimming in Lake Ontario.&quot;</p>
                     <div className="mt-2 text-sm text-red-600">Rejected as John is afraid of deep water</div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function Home() {
                   <div className="flex-grow">
                     <p className="font-medium">Human revises with constraint in mind</p>
                     <p className="text-muted-foreground mt-1">
-                      "To overcome his fear of deep water, he first made himself comfortable in shallow water."
+                    &quot;To overcome his fear of deep water, he first made himself comfortable in shallow water.&quot;
                     </p>
                     <div className="mt-2 text-sm text-green-600">Accepted</div>
                   </div>
