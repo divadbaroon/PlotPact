@@ -1,21 +1,23 @@
-
 'use server';
 
 import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
 import { setStoryContext, debugStoryContext } from '@/lib/sessionStore';
 
-import { StoryResponse} from "@/types"
+import { StoryResponse } from '@/types';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const storyContexts = new Map();
 
-const knightStoryPrompt = `I want to create a interactive game within gemini. Initially send the intro to the story, with the intro, send in 4 options as in 4 paths the user can take after that point in the story. The response should be in json and and have 2 fields  - ‘para’ and ‘choices’. The user can reply with either of the choices, ask you to ‘continue the story’ or give text of their own to move the story forward. After that reply again in json with 2 fields - ‘para’ and ‘choices’.
+const knightStoryPrompt = `I want to create a interactive story game. Initially send the intro to the story, with the intro, send in 4 options as in 4 paths the user can take after that point in the story. The response should be in json and and have 2 fields  - ‘para’ and ‘choices’. The user can reply with either of the choices, ask you to ‘continue the story’ or give text of their own to move the story forward. After that reply again in json with 2 fields - ‘para’ and ‘choices’.
 
 If the user deviates too much from the story or writes nonsense, manage it in the next para you give by slightly incorporating what the user is saying by overall staying in the story. Like if the user says something really nonsensical, put it in the narrative that he was dreaming.
+
+The story should progress forward and eventually end. After the story, return a json with 1 value 'eos' with some ending text.
+
 
 Here is the narrative for the story. This is only one of the direction. They story may deviate based on options you give the user and the paths user takes:
 
@@ -102,27 +104,27 @@ export async function startChatStory(): Promise<StoryResponse> {
 
     // Generate initial story with GPT
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o-mini',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `You are a creative storyteller managing an interactive narrative. The story should be based on this narrative background, but the exact events can vary based on user choices: ${knightStoryPrompt}
 
 Return ONLY a JSON response with two fields:
 1. 'para': The opening scene of the story (first few paragraphs that set up the situation)
 2. 'choices': Array of 4 possible actions the protagonist could take next
 
-Make the choices meaningful and divergent, allowing for different possible story paths.`
-        }
+Make the choices meaningful and divergent, allowing for different possible story paths.`,
+        },
       ],
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
       temperature: 0.8,
     });
 
     // Parse the response
     const responseContent = completion.choices[0].message.content || '{}';
     console.log(`Received story start:`, responseContent);
-    
+
     let responseData;
     try {
       responseData = JSON.parse(responseContent);
@@ -134,7 +136,7 @@ Make the choices meaningful and divergent, allowing for different possible story
     // Store story context using file-based storage
     const success = await setStoryContext(chatId, {
       story: [responseData.para],
-      lastChoices: responseData.choices
+      lastChoices: responseData.choices,
     });
 
     if (!success) {
@@ -149,7 +151,7 @@ Make the choices meaningful and divergent, allowing for different possible story
     return {
       chatId,
       para: responseData.para,
-      choices: responseData.choices
+      choices: responseData.choices,
     };
   } catch (error) {
     console.error('Error starting chat story:', error);
@@ -162,37 +164,39 @@ export async function startChat() {
     const chatId = randomUUID();
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: 'gpt-4o',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `Create an educational multiple choice game about the Apollo 13 mission. Start with a brief introduction and provide the first question. Return response in JSON format with fields:
           - 'para': Brief introduction
           - 'question': First question
-          - 'choices': Array of possible answers (one correct, 3-4 incorrect)`
+          - 'choices': Array of possible answers (one correct, 3-4 incorrect)`,
         },
         {
-          role: "user",
-          content: `Use this background: Apollo 13 was the seventh crewed mission in NASA's Apollo space program...`
-        }
+          role: 'user',
+          content: `Use this background: Apollo 13 was the seventh crewed mission in NASA's Apollo space program...`,
+        },
       ],
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
       temperature: 0.7,
     });
 
-    const responseData = JSON.parse(completion.choices[0].message.content || '{}');
+    const responseData = JSON.parse(
+      completion.choices[0].message.content || '{}'
+    );
 
     // Store initial context
     storyContexts.set(chatId, {
       story: [responseData.para],
       lastQuestion: responseData.question,
       lastChoices: responseData.choices,
-      correctAnswers: 0
+      correctAnswers: 0,
     });
 
     return {
       chatId,
-      ...responseData
+      ...responseData,
     };
   } catch (error) {
     console.error('Error starting chat:', error);

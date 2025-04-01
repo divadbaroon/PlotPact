@@ -20,7 +20,7 @@ export async function sendAnswer(chatId: string, answer: string) {
 
     // Call GPT to continue the story
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
