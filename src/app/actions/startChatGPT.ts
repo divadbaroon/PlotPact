@@ -4,6 +4,10 @@ import { randomUUID } from 'crypto';
 import { OpenAI } from 'openai';
 import { createSession, updateSession } from '@/lib/sessionStoreNew';
 
+import type { Message } from '@/lib/sessionStoreNew';
+
+// import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -92,14 +96,15 @@ You were not a legend because you were invincible.
 
 You were a legend because you stood.
 
-Because when the world begged for a hero — you answered.`
-
+Because when the world begged for a hero — you answered.`;
 
 export async function startChatStory() {
   const chatId = randomUUID();
 
-  const systemPrompt = 'You are a storytelling assistant that replies in JSON with keys: para, choices, eos.';
-  const history = [
+  const systemPrompt =
+    'You are a storytelling assistant that replies in JSON with keys: para, choices, eos.';
+
+  const history: Message[] = [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: `${prompt}` },
   ];
@@ -111,6 +116,7 @@ export async function startChatStory() {
   });
 
   const reply = completion.choices[0].message!;
+
   const responseText = reply.content ?? '';
 
   const parsed = JSON.parse(
@@ -121,8 +127,15 @@ export async function startChatStory() {
       .trim()
   );
 
-  // Save full history
-  const fullHistory = [...history, reply];
+  // ✅ Normalize GPT reply for your session store
+  const normalizedReply = {
+    role: reply.role as 'assistant', // safe cast
+    content: reply.content ?? '',
+  };
+
+  // ✅ Save full history
+  const fullHistory: Message[] = [...history, normalizedReply];
+
   createSession(chatId, systemPrompt);
   updateSession(chatId, fullHistory);
 
