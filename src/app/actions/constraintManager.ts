@@ -6,6 +6,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+import { Constraint } from "@/types"
+
 export async function generateConstraints(storyContext: string[]) {
   try {
     console.log("Generating constraints for story context:", storyContext);
@@ -71,7 +73,7 @@ export async function generateConstraints(storyContext: string[]) {
   }
 }
   
-export async function verifyContent(content: string, storyContext: string[], currentConstraints: any[]) {
+export async function verifyContent(content: string, storyContext: string[], currentConstraints: Constraint[]) {
   try {
     console.log("Verifying content:", content.substring(0, 50) + "...");
     console.log("Against constraints:", currentConstraints.length);
