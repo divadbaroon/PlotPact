@@ -1,28 +1,23 @@
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
+import { Redis } from '@upstash/redis';
 
-import { StoryContext } from "@/types"
+import { StoryContext } from "@/types";
 
-// Define the directory where session data will be stored
-const SESSION_DIR = path.join(process.cwd(), 'sessions');
+// Initialize Redis client
+const redis = Redis.fromEnv();
 
-// Ensure the session directory exists
-async function ensureSessionDir() {
-  try {
-    await fs.mkdir(SESSION_DIR, { recursive: true });
-  } catch (error) {
-    console.error('Error creating session directory:', error);
-  }
-}
+// Prefix for all keys in the Redis store
+const KEY_PREFIX = 'story:';
 
-// Save session data to a file
+// TTL for session data (in seconds) - 7 days
+const TTL_SECONDS = 60 * 60 * 24 * 7;
+
+// Save session data to Redis
 export async function setStoryContext(id: string, context: StoryContext): Promise<boolean> {
   try {
-    await ensureSessionDir();
-    const filePath = path.join(SESSION_DIR, `${id}.json`);
-    await fs.writeFile(filePath, JSON.stringify(context, null, 2));
+    // Store with expiration
+    await redis.set(`${KEY_PREFIX}${id}`, context, { ex: TTL_SECONDS });
     console.log(`Saved context for ${id}`);
     return true;
   } catch (error) {
@@ -31,18 +26,16 @@ export async function setStoryContext(id: string, context: StoryContext): Promis
   }
 }
 
-// Get session data from a file
+// Get session data from Redis
 export async function getStoryContext(id: string): Promise<StoryContext | undefined> {
   try {
-    const filePath = path.join(SESSION_DIR, `${id}.json`);
-    const data = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(data) as StoryContext;
-  } catch (error) {
-    // If file not found, return undefined (similar to cookie not found)
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    const data = await redis.get(`${KEY_PREFIX}${id}`);
+    if (!data) {
       console.log(`No session found for ${id}`);
       return undefined;
     }
+    return data as StoryContext;
+  } catch (error) {
     console.error(`Error reading story context for ${id}:`, error);
     return undefined;
   }
@@ -72,16 +65,45 @@ export async function debugStoryContext(id: string): Promise<StoryContext | unde
   return context;
 }
 
-// List all active sessions
+// List all active sessions (using Redis SCAN)
 export async function listAllSessions(): Promise<string[]> {
   try {
-    await ensureSessionDir();
-    const files = await fs.readdir(SESSION_DIR);
-    return files
-      .filter(file => file.endsWith('.json'))
-      .map(file => file.replace('.json', ''));
+    const keys: string[] = [];
+    let cursor = '0'; // Redis SCAN cursor is a string in Upstash client
+    
+    do {
+      // Scan in batches of 100
+      const response: [string, string[]] = await redis.scan(cursor, {
+        match: `${KEY_PREFIX}*`,
+        count: 100
+      });
+      
+      // Update cursor for next iteration
+      cursor = response[0];
+      
+      // Add found keys to our array
+      keys.push(...response[1]);
+      
+      // Break if we've scanned all keys (cursor returns to '0')
+      if (cursor === '0') break;
+    } while (true);
+    
+    // Remove the prefix to get just the IDs
+    return keys.map(key => key.replace(KEY_PREFIX, ''));
   } catch (error) {
     console.error('Error listing sessions:', error);
     return [];
+  }
+}
+
+// Delete a session
+export async function deleteStoryContext(id: string): Promise<boolean> {
+  try {
+    await redis.del(`${KEY_PREFIX}${id}`);
+    console.log(`Deleted session ${id}`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting session ${id}:`, error);
+    return false;
   }
 }
