@@ -18,3 +18,32 @@ export interface Choice {
   options: string[];
   selected?: string;
 }
+
+export type StoryResponse = {
+  chatId: string;
+  para?: string;
+  question?: string;
+  choices?: string[];
+  eos?: string | boolean;  
+  constraints?: {
+    type: string;
+    description: string;
+    reason: string;
+  }[];
+};
+
+export type Constraint = {
+  type: string;
+  description: string;
+  reason: string;
+};
+
+export type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
+
+export type StoryContext = {
+  story: string[];
+  lastChoices: string[];
+  lastQuestion?: string;
+  correctAnswers?: number;
+  originalPrompt?: string;
+};
