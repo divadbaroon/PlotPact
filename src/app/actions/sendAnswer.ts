@@ -1,30 +1,79 @@
 'use server';
 
-import { getSession } from '@/lib/sessionStore';
-import { parseGeminiJson } from '@/lib/parseGeminiResponse';
+import OpenAI from 'openai';
+import { getStoryContext, updateStoryContext, debugStoryContext } from '@/lib/sessionStore';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 export async function sendAnswer(chatId: string, answer: string) {
-  const chat = getSession(chatId);
-  if (!chat) throw new Error('Chat session not found');
+  try {
 
-  const response = await chat.sendMessage(answer);
-  const rawText = response?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Get the current story context
+    const storyContext = await getStoryContext(chatId);
 
-  if (!rawText) throw new Error('No content received from Gemini');
+    if (!storyContext) {
+      console.error(`Story context not found for chatId: ${chatId}`);
+      throw new Error('Chat session not found');
+    }
 
-  const parsed = parseGeminiJson(rawText);
-  return parsed;
-}
+    // Call GPT to continue the story
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are managing an interactive narrative for "The Last Shield: A Knight's Stand". 
+          Story context so far:
+          ${storyContext.story.join("\n")}
+          
+          User's choice/input: ${answer}
+          
+          Return a JSON response with:
+          1. 'para': A new paragraph continuing the story based on the user's choice
+          2. 'choices': Array of 4 new possible continuations`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.8,
+    });
 
-export async function sendAnswerStory(chatId: string, answer: string) {
-  const chat = getSession(chatId);
-  if (!chat) throw new Error('Chat session not found');
+    // Parse the response
+    const responseContent = completion.choices[0].message.content || '{}';
+    console.log(`Received response: ${responseContent}`);
+    
+    let responseData;
+    try {
+      responseData = JSON.parse(responseContent);
+    } catch (error) {
+      console.error('Failed to parse JSON response:', error);
+      throw new Error('Invalid response from AI service');
+    }
 
-  const response = await chat.sendMessage(answer);
-  const rawText = response?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Update the story context with the new paragraph and choices
+    const updated = await updateStoryContext(chatId, {
+      story: [...storyContext.story, responseData.para],
+      lastChoices: responseData.choices
+    });
 
-  if (!rawText) throw new Error('No content received from Gemini');
+    if (!updated) {
+      console.error(`Failed to update story context for chatId: ${chatId}`);
+    } else {
+      // Verify the update worked by retrieving the updated context
+      await debugStoryContext(chatId);
+    }
 
-  const parsed = parseGeminiJson(rawText);
-  return parsed;
+    // Check if we should end the story
+    if (storyContext.story.length >= 10 || responseData.para.toLowerCase().includes('the end')) {
+      return {
+        eos: "You've reached the end of your journey. The Last Shield's tale is now complete, but legends never truly end - they live on in the hearts of those who hear them."
+      };
+    }
+
+    return responseData;
+  } catch (error) {
+    console.error('Error processing story answer:', error);
+    throw error;
+  }
 }
