@@ -9,7 +9,13 @@ import {
   verifyContent,
 } from '@/app/actions/constraintManager';
 
-import { StoryResponse, Constraint, InteractionMode } from '@/types';
+import {
+  StoryResponse,
+  Constraint,
+  InteractionMode,
+  Violation,
+  ViolationState,
+} from '@/types';
 
 const ChatInterface: React.FC = () => {
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -31,10 +37,18 @@ const ChatInterface: React.FC = () => {
   const [isStreaming, setIsStreaming] = useState(false);
 
   const [constraints, setConstraints] = useState<Constraint[]>([]);
+  const [newConstraints, setNewConstraints] = useState<Constraint[]>([]);
+
+  const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
+
   const [violations, setViolations] = useState<
     { constraintType: string; explanation: string }[]
   >([]);
-  const [showConstraints, setShowConstraints] = useState(false);
+
+  const [showNewConstraints, setShowNewConstraints] = useState(false);
+  const [showAllConstraints, setShowAllConstraints] = useState(false);
+
+  const [showViolations, setShowViolations] = useState(false);
 
   // Used monitor constraints changes
   useEffect(() => {
@@ -46,11 +60,11 @@ const ChatInterface: React.FC = () => {
     setIsStreaming(true);
 
     const words = text.split(/\s+/);
-    let currentWordIndex = 0;
+    let currentWordIndex = -1;
 
     setTimeout(() => {
       const interval = setInterval(() => {
-        const prefix = currentWordIndex > 0 ? ' ' : '';
+        const prefix = currentWordIndex > -1 ? ' ' : '';
         setStreamingPara((prev) => prev + prefix + words[currentWordIndex]);
 
         currentWordIndex++;
@@ -81,9 +95,16 @@ const ChatInterface: React.FC = () => {
         if (data.para) {
           streamText(data.para);
           console.log('About to generate constraints for:', [data.para]);
-          const newConstraints = await generateConstraints([data.para]);
-          console.log('Received constraints:', newConstraints);
-          setConstraints(newConstraints);
+          const newConstraints = await generateConstraints(
+            [data.para],
+            constraints
+          );
+          console.log('Received New constraints:', newConstraints);
+          console.log('Old Constraints:', constraints);
+          setNewConstraints(newConstraints);
+          // setConstraints([...constraints, ...newConstraints]);
+
+          setConstraints((prev) => [...prev, ...newConstraints]);
         }
 
         setQuestion(data.question || null);
@@ -112,6 +133,15 @@ const ChatInterface: React.FC = () => {
 
       if (!verificationResult.isValid) {
         setViolations(verificationResult.violations);
+
+        setViolationsList((prev) => [
+          ...prev,
+          {
+            violations: [...verificationResult.violations],
+            sentContent: input,
+          },
+        ]);
+
         return;
       }
 
@@ -124,11 +154,17 @@ const ChatInterface: React.FC = () => {
         streamText(data.para);
         // Generate new constraints based on the new content
         console.log('About to generate constraints for new paragraph...');
-        const newConstraints = await generateConstraints([...paras, data.para]);
-        console.log('Received new constraints:', newConstraints);
-        // setConstraints((prev) => [...prev, ...newConstraints]);
+        const newConstraints = await generateConstraints(
+          [...paras, data.para],
+          constraints
+        );
 
-        setConstraints(() => [...newConstraints]);
+        console.log('Received new constraints:', newConstraints);
+        console.log('Old Constraints:', constraints);
+
+        setNewConstraints(newConstraints);
+
+        setConstraints((prev) => [...prev, ...newConstraints]);
 
         setIsIncorrect(false);
       } else {
@@ -163,7 +199,7 @@ const ChatInterface: React.FC = () => {
         <h3 className='text-lg font-semibold mb-2 text-red-700'>
           Story Inconsistencies Found:
         </h3>
-        {violations.map((violation, index) => (
+        {violations.map((violation: Violation, index: number) => (
           <div key={index} className='mb-2 border-l-4 border-red-500 pl-3'>
             <p className='text-red-600 font-medium'>
               {violation.constraintType}
@@ -198,16 +234,47 @@ const ChatInterface: React.FC = () => {
     </div>
   );
 
+  //show new constraints
+  const NewConstraintPanel = () => (
+    <div className='bg-gray-50 p-4 rounded-lg mb-4'>
+      <h3 className='text-lg font-semibold mb-2 text-gray-900'>
+        Story Constraints
+      </h3>
+      {newConstraints.length === 0 ? (
+        <p className='text-gray-600'>No story constraints established yet.</p>
+      ) : (
+        newConstraints.map((constraint, index) => (
+          <div key={index} className='mb-3 p-2 bg-white rounded shadow'>
+            <p className='font-medium text-gray-900'>
+              {constraint.description}
+            </p>
+            <p className='text-sm text-gray-600 mt-1'>{constraint.reason}</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
   return (
     <div>
       <div className='flex h-screen bg-white'>
         <div className='flex-1 flex flex-col border-r border-gray-200'>
           <header className='bg-white border-b border-gray-200 p-4 flex items-center justify-between'>
             <button
-              onClick={() => setShowConstraints(!showConstraints)}
+              onClick={() => setShowNewConstraints(!showNewConstraints)}
               className='text-blue-600 hover:text-blue-800'
             >
-              {showConstraints ? 'Hide Constraints' : 'Show Constraints'}
+              {showNewConstraints
+                ? 'Hide New Constraints'
+                : 'Show New Constraints'}
+            </button>
+            <button
+              onClick={() => setShowAllConstraints(!showAllConstraints)}
+              className='text-blue-600 hover:text-blue-800'
+            >
+              {showAllConstraints
+                ? 'Hide All Constraints'
+                : 'Show All Constraints'}
             </button>
             <button onClick={togglePanel} className='text-gray-600'>
               ☰
@@ -215,7 +282,8 @@ const ChatInterface: React.FC = () => {
           </header>
 
           <div className='flex-1 overflow-y-auto p-4'>
-            {showConstraints && <ConstraintPanel />}
+            {showNewConstraints && <NewConstraintPanel />}
+            {showAllConstraints && <ConstraintPanel />}
 
             <h1 className='text-4xl font-bold text-center mb-5 text-gray-800'>
               The Last Shield: A Knight&apos;s Stand
@@ -309,13 +377,6 @@ const ChatInterface: React.FC = () => {
                     }}
                     className='flex gap-2 mt-5'
                   >
-                    {/* <input
-                      type='text'
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      placeholder='Continue the story...'
-                      className='flex-1 p-2 border border-gray-300 rounded text-black focus:outline-none focus:ring-1 focus:ring-gray-500'
-                    /> */}
                     <textarea
                       value={customInput}
                       onChange={(e) => setCustomInput(e.target.value)}
@@ -350,10 +411,74 @@ const ChatInterface: React.FC = () => {
 
         <div
           className={`${
-            panelOpen ? 'w-64' : 'w-0'
+            panelOpen ? 'w-500' : 'w-0'
           } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
         >
-          <div className='p-4'>
+          <div className='space-y-4'>
+            {/* Constraint Toggle */}
+            {/* <div>
+              <button
+                className='w-full text-left bg-blue-100 px-4 py-2 rounded-md shadow hover:bg-blue-200'
+                onClick={() => setShowConstraints((prev) => !prev)}
+              >
+                {showConstraints ? '▼' : '▶'} Constraints
+              </button>
+              {showConstraints && (
+                <div className='mt-2 space-y-3 p-4 bg-white rounded-md border border-blue-200'>
+                  {constraints.map((c, i) => (
+                    <div key={i} className='text-sm'>
+                      <p>
+                        <strong>Type:</strong> {c.type}
+                      </p>
+                      <p>
+                        <strong>Description:</strong> {c.description}
+                      </p>
+                      <p>
+                        <strong>Reason:</strong> {c.reason}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div> */}
+
+            {/* Violations Toggle */}
+            <div>
+              <button
+                className='w-full text-left bg-red-100 px-4 py-2 rounded-md shadow hover:bg-red-200'
+                onClick={() => setShowViolations((prev) => !prev)}
+              >
+                {showViolations ? '▼' : '▶'} Violations
+              </button>
+              {showViolations && (
+                <div className='mt-2 space-y-3 p-4 bg-white rounded-md border border-red-200'>
+                  {violationsList.map((v, i) => (
+                    <div key={i} className='text-sm'>
+                      <p className='text-gray-700 mb-1'>
+                        <strong>Input:</strong> {v.sentContent}
+                      </p>
+                      {v.violations.map((violation, j) => (
+                        <div
+                          key={j}
+                          className='pl-3 mb-2 border-l-2 border-red-400'
+                        >
+                          <p>
+                            <strong>Constraint:</strong>{' '}
+                            {violation.constraintType}
+                          </p>
+                          <p>
+                            <strong>Explanation:</strong>{' '}
+                            {violation.explanation}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {/* <div className='p-4'>
             <h2 className='text-xl font-bold mb-4 text-black'>Configuration</h2>
 
             <div className='space-y-6'>
@@ -398,7 +523,7 @@ const ChatInterface: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

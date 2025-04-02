@@ -8,9 +8,12 @@ const openai = new OpenAI({
 
 import { Constraint } from '@/types';
 
-export async function generateConstraints(storyContext: string[]) {
+export async function generateConstraints(
+  storyContext: string[],
+  existingConstraints: Constraint[]
+) {
   try {
-    console.log('Generating constraints for story context:', storyContext);
+    // console.log('Generating constraints for story context:', storyContext);
 
     const storyContent = storyContext.join('\n');
     console.log(
@@ -23,7 +26,7 @@ export async function generateConstraints(storyContext: string[]) {
       messages: [
         {
           role: 'system',
-          content: `You are a narrative constraint generator. Given a story segment, extract key story elements and generate narrative constraints that must be followed for story consistency. The example is only one path for the story, the user may take completely different path and create a completely different story but they have to remain within the constraints. Make the constrains broad and lenient. Just things like setting and time. Do not include things like story plot and next paths user can take. Basically the user is free to do anything as long as the story moves forward in a meaningful way.
+          content: `You are a narrative constraint generator. Given a story segment, extract key story elements and generate narrative constraints that must be followed for story consistency. The user may take completely different path and create a completely different story but they have to remain within the constraints. Make the constrains broad and lenient. Just things like setting and time. Do not include things like story plot and next paths user can take. The user should be free to do anything as long as the story moves forward in a meaningful way.
           
           Return constraints in a JSON object with a "constraints" array, where each constraint has:
           - "type": The category of constraint (character, plot, setting)
@@ -43,12 +46,17 @@ export async function generateConstraints(storyContext: string[]) {
         },
         {
           role: 'user',
-          content: `Analyze this story content and generate constraints:
-          ${storyContent}`,
+          content: `Story content: ${storyContent}; 
+          Existing constraints: ${JSON.stringify(
+            existingConstraints,
+            null,
+            2
+          )}; 
+          Existing constrains should be considered but not returned. Only new constraints other than the existing ones should be returned, if any. Do not return existing constraints or constraints matching existing constraints.`,
         },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.7,
+      temperature: 0.6,
     });
 
     const responseContent =
@@ -86,27 +94,27 @@ export async function verifyContent(
     console.log('Verifying content:', content.substring(0, 50) + '...');
     console.log('Against constraints:', currentConstraints.length);
 
-    const prompt = `Verify if this new content follows all established story constraints. If there are violations, explain what they are and why they break consistency. The user free is take the story into any direction as long as it makes sense. The threshold to accept the response should be very low, that means if the new content even slightly fits into the story it should go through. The user need not depend fully on the story context. They can take completely different paths and actions and create a completely different story at the end. The system should check for broad constraints and only stop things that don't make sense at all. Do not force the user to just stay within the story context. Basically the user is free to do anything within the story as long as the story moves forward in a meaningful way.
+    const prompt = `Verify if this new content follows all established story constraints. If there are violations, explain what they are and why they break consistency. The user free is take the story into any direction. The threshold to accept the response should be very low, that means if the new content fits into the story in any way it should be accepted. The user need not depend fully on the story context. They can take completely different paths and actions. The system should check for broad constraints and only stop things that don't make sense. The user is free to do anything within the story as long as the story moves forward in a meaningful way.
 
-Story context:
-${storyContext.join('\n')}
+    Story context:
+    ${storyContext.join('\n')};
 
-Current constraints:
-${JSON.stringify(currentConstraints, null, 2)}
+    Current constraints:
+    ${JSON.stringify(currentConstraints, null, 2)};
 
-New content to verify:
-${content}
+    New content to verify:
+    ${content};
 
-Format the response as JSON:
-{
-  "isValid": boolean,
-  "violations": [
+    Format the response as JSON:
     {
-      "constraintType": string,
-      "explanation": string
-    }
-  ]
-}`;
+      "isValid": boolean,
+      "violations": [
+        {
+          "constraintType": string,
+          "explanation": string
+        }
+      ]
+    }`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

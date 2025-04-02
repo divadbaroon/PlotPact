@@ -6,8 +6,6 @@ import { createSession, updateSession } from '@/lib/sessionStoreNew';
 
 import type { Message } from '@/lib/sessionStoreNew';
 
-// import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -127,13 +125,11 @@ export async function startChatStory() {
       .trim()
   );
 
-  // ✅ Normalize GPT reply for your session store
   const normalizedReply = {
     role: reply.role as 'assistant', // safe cast
     content: reply.content ?? '',
   };
 
-  // ✅ Save full history
   const fullHistory: Message[] = [...history, normalizedReply];
 
   createSession(chatId, systemPrompt);

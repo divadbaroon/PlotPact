@@ -7,10 +7,10 @@ export interface Message {
 }
 
 export interface ExpandingCardProps {
-  title: string
-  description: string
-  image: string | StaticImageData
-  link: string
+  title: string;
+  description: string;
+  image: string | StaticImageData;
+  link: string;
 }
 
 export interface Choice {
@@ -24,7 +24,7 @@ export type StoryResponse = {
   para?: string;
   question?: string;
   choices?: string[];
-  eos?: string | boolean;  
+  eos?: string | boolean;
   constraints?: {
     type: string;
     description: string;
@@ -36,6 +36,16 @@ export type Constraint = {
   type: string;
   description: string;
   reason: string;
+};
+
+export type Violation = {
+  constraintType: string;
+  explanation: string;
+};
+
+export type ViolationState = {
+  violations: Violation[];
+  sentContent: string;
 };
 
 export type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
