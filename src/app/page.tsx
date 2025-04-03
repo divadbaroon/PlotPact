@@ -67,9 +67,9 @@ export default function Home() {
                     of a broken hero who must rediscover his courage as he confronts impossible odds, devising a
                     desperate plan that will determine the fate of everyone he holds dear. */}
                     Lila discovers a mysterious wooden box on her doorstep, adorned with a brass dial and an ominous note: 
-                    "Turn the dial to the right number to save him." With no clue who "him" refers to—her brother, her father, 
+                    &quot;Turn the dial to the right number to save him.&quot; With no clue who &quot;him&quot; refers to—her brother, her father, 
                     or someone else—panic grips her. As she turns the box over, faint numbers etched along its edges hint at a 
-                    hidden code. Racing against an unknown clock, she must decipher the message before it’s too late. 
+                    hidden code. Racing against an unknown clock, she must decipher the message before it&quot;s too late. 
                     The story unfolds as a tense puzzle, blending suspense and urgency, where every second counts and the right number 
                     holds the key to salvation.
                   </p>
