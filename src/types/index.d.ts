@@ -57,3 +57,7 @@ export type StoryContext = {
   correctAnswers?: number;
   originalPrompt?: string;
 };
+
+export type ChatInterfaceProps = {
+  storyId: string;
+};
