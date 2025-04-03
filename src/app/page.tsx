@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, BookOpen, Brain, Lightbulb, Users } from "lucide-react"
 
 import apollo13 from "../../public/story-images/apollo13.jpg"
-import knight from "../../public/story-images/knight.jpg"
+import knight from "../../public/story-images/lila.png"
 
 export default function Home() {
   return (
@@ -58,13 +58,20 @@ export default function Home() {
                 </div>
                 <div className="p-6 flex-grow">
                   <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                    The Last Shield: A Knight&apos;s Stand
+                    {/* The Last Shield: A Knight&apos;s Stand */}
+                    The Box with the Brass Dial
                   </h3>
                   <p className="text-muted-foreground">
-                    When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir
+                    {/* When the ancient dragon Malgrath descends upon the peaceful village of Oakendale, retired knight Sir
                     Brannen takes up his rusted armor for one final battle to protect his home. Experience the journey
                     of a broken hero who must rediscover his courage as he confronts impossible odds, devising a
-                    desperate plan that will determine the fate of everyone he holds dear.
+                    desperate plan that will determine the fate of everyone he holds dear. */}
+                    Lila discovers a mysterious wooden box on her doorstep, adorned with a brass dial and an ominous note: 
+                    "Turn the dial to the right number to save him." With no clue who "him" refers to—her brother, her father, 
+                    or someone else—panic grips her. As she turns the box over, faint numbers etched along its edges hint at a 
+                    hidden code. Racing against an unknown clock, she must decipher the message before it’s too late. 
+                    The story unfolds as a tense puzzle, blending suspense and urgency, where every second counts and the right number 
+                    holds the key to salvation.
                   </p>
                 </div>
                 <div className="px-6 pb-6 pt-2">

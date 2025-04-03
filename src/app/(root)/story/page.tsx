@@ -286,12 +286,13 @@ const ChatInterface: React.FC = () => {
             {showAllConstraints && <ConstraintPanel />}
 
             <h1 className='text-4xl font-bold text-center mb-5 text-gray-800'>
-              The Last Shield: A Knight&apos;s Stand
+              {/* The Last Shield: A Knight&apos;s Stand */}
+              The Box with the Brass Dial
             </h1>
 
             <div className='w-2/3 h-[35vh] overflow-hidden rounded-lg shadow mb-5 ml-auto mr-auto'>
               <img
-                src='/story-images/knight.jpg'
+                src='/story-images/lila.png'
                 alt='Chat Banner'
                 className='object-cover w-full h-full'
               />

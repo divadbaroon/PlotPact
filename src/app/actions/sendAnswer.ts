@@ -24,7 +24,7 @@ export async function sendAnswer(chatId: string, answer: string) {
       messages: [
         {
           role: "system",
-          content: `You are managing an interactive narrative for "The Last Shield: A Knight's Stand". 
+          content: `You are managing an interactive narrative for "The Box with the Brass Dial". 
           Story context so far:
           ${storyContext.story.join("\n")}
           
@@ -67,7 +67,7 @@ export async function sendAnswer(chatId: string, answer: string) {
     // Check if we should end the story
     if (storyContext.story.length >= 10 || responseData.para.toLowerCase().includes('the end')) {
       return {
-        eos: "You've reached the end of your journey. The Last Shield's tale is now complete, but legends never truly end - they live on in the hearts of those who hear them."
+        eos: "You've reached the end of your journey. The Box with the Brass Dial tale is now complete. Thank you for playing!",
       };
     }
 
