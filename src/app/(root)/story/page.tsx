@@ -465,7 +465,7 @@ const ChatInterface: React.FC = () => {
               )}
             </div>
 
-            {loading && (
+            {loading && !isStreaming &&  (
               <div className="flex justify-center my-6">
                 <Loader2 className="h-10 w-10 text-gray-500 animate-spin" />
               </div>
