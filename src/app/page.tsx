@@ -345,7 +345,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className='flex gap-4'>
+            {/* <div className='flex gap-4'>
               <div className='flex-shrink-0 bg-primary/10 p-3 rounded-full h-12 w-12 flex items-center justify-center'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
@@ -373,9 +373,9 @@ export default function Home() {
                   King, or J.K. Rowling for your AI co-author.
                 </p>
               </div>
-            </div>
+            </div> */}
 
-            <div className='flex gap-4'>
+            {/* <div className='flex gap-4'>
               <div className='flex-shrink-0 bg-primary/10 p-3 rounded-full h-12 w-12 flex items-center justify-center'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
@@ -405,7 +405,7 @@ export default function Home() {
                   comedy, and more.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className='flex gap-4'>
               <div className='flex-shrink-0 bg-primary/10 p-3 rounded-full h-12 w-12 flex items-center justify-center'>

@@ -70,10 +70,21 @@ const ChatInterface: React.FC = () => {
     'all'
   );
 
-  let storyImg;
+  let storyDetails = {
+    storyImg: knight,
+    storyTitle: `A Knight's Stand`,
+  };
 
-  if (storyId == '1') storyImg = lila;
-  else storyImg = knight;
+  if (storyId == '1') {
+    storyDetails = {
+      storyImg: lila,
+      storyTitle: 'The Box with the Brass Dial',
+    };
+  } else
+    storyDetails = {
+      storyImg: knight,
+      storyTitle: `A Knight's Stand`,
+    };
 
   // Used to monitor constraints changes
   useEffect(() => {
@@ -92,11 +103,13 @@ const ChatInterface: React.FC = () => {
     setIsStreaming(true);
 
     const words = text.split(/\s+/);
-    let currentWordIndex = 0;
+
+    //Fix for first word not being streamed
+    let currentWordIndex = -1;
 
     const interval = setInterval(() => {
       if (currentWordIndex < words.length) {
-        const prefix = currentWordIndex > 0 ? ' ' : '';
+        const prefix = currentWordIndex > -1 ? ' ' : '';
         setStreamingPara((prev) => prev + prefix + words[currentWordIndex]);
         currentWordIndex++;
       } else {
@@ -538,7 +551,7 @@ const ChatInterface: React.FC = () => {
         <div className='flex-1 overflow-y-auto p-4 md:p-6 lg:p-8'>
           <div className='max-w-3xl mx-auto'>
             <h1 className='text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800'>
-              The Box with the Brass Dial
+              {storyDetails.storyTitle}
             </h1>
 
             <div className='aspect-video overflow-hidden rounded-lg shadow-md mb-8 mx-auto hover:shadow-lg transition-all duration-300 relative h-64 w-full'>
@@ -548,7 +561,7 @@ const ChatInterface: React.FC = () => {
                 className='object-cover w-full h-full'
               /> */}
               <Image
-                src={storyImg}
+                src={storyDetails.storyImg}
                 alt='Story Image'
                 fill
                 className='object-cover w-full h-full'
