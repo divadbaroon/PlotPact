@@ -3,9 +3,6 @@
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import { 
-  Menu, 
-  ChevronDown, 
-  ChevronUp, 
   ChevronLeft, 
   ChevronRight, 
   Loader2, 
@@ -17,8 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import MultipleChoiceBox from "@/components/MultipleChoiceBox"
 import { startChatStory } from "@/app/actions/startChatGPT"
 import { sendAnswer } from "@/app/actions/sendAnswerGPT"
@@ -51,9 +46,6 @@ const ChatInterface: React.FC = () => {
   const [violationsList, setViolationsList] = useState<ViolationState[]>([])
   const [violations, setViolations] = useState<Violation[]>([])
 
-  const [showNewConstraints, setShowNewConstraints] = useState(false)
-  const [showAllConstraints, setShowAllConstraints] = useState(false)
-  const [showViolations, setShowViolations] = useState(false)
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all')
 
   // Used to monitor constraints changes
@@ -374,10 +366,9 @@ const ChatInterface: React.FC = () => {
       <div className="flex-1 flex flex-col border-r border-gray-200 bg-white">
         <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-2">
-            {/* PlotPact icon/logo on the left */}
             <div className="flex items-center">
               <BookOpen className="h-5 w-5" />
-              <span className="ml-2 font-bold">PlotPact</span>
+              <span className="ml-4 font-bold">PlotPact</span>
             </div>
           </div>
 
@@ -498,7 +489,7 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
 
-      {/* Enhanced side panel with the improved constraints UI - MADE WIDER */}
+      {/* side panel  */}
       <div
         className={`${
           panelOpen ? "w-96 md:w-[500px] lg:w-[600px]" : "w-0"
