@@ -323,7 +323,7 @@ const ChatInterface: React.FC = () => {
                     <CheckCircle2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-700 mb-3">No New Constraints</h3>
                     <p className="text-gray-500 max-w-xl mx-auto">
-                      New story constraints will appear here when they're discovered in your latest additions.
+                      New story constraints will appear here when they&apos;re discovered in your latest additions.
                     </p>
                   </div>
                 </div>
