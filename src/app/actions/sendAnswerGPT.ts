@@ -30,7 +30,7 @@ export async function sendAnswer(chatId: string, userInput: string) {
     : [];
   
   // Merge all messages in the right order
-  let allMessages: Message[] = [];
+  const allMessages: Message[] = [];
   if (systemMessage.length > 0) {
     allMessages.push(systemMessage[0]);
   }
