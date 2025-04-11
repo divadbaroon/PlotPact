@@ -1,17 +1,48 @@
 'use server';
 
 import { OpenAI } from 'openai';
-import { getSession, updateSession } from '@/lib/sessionStoreNew';
+import { getStoryContext, updateStoryContext } from '@/lib/sessionStore';
 
 import type { Message } from '@/lib/sessionStoreNew';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function sendAnswer(chatId: string, userInput: string) {
-  const history = getSession(chatId);
-  if (!history) throw new Error('Session not found');
+  // Get the story context from Redis
+  const context = await getStoryContext(chatId);
+  if (!context) throw new Error('Session not found');
 
-  const updated: Message[] = [...history, { role: 'user', content: userInput }];
+  const systemMessage: Message[] = context.originalPrompt 
+    ? [{ role: 'system', content: context.originalPrompt }] 
+    : [];
+  
+  // Add previous messages based on story content
+  const assistantMessages: Message[] = context.story.map(content => ({
+    role: 'assistant',
+    content,
+  }));
+
+  const userMessages: Message[] = assistantMessages.length > 0 
+    ? new Array(assistantMessages.length).fill('').map((_, index) => ({
+        role: 'user',
+        content: index === 0 ? context.originalPrompt || 'Start story' : 'Continue',
+      }))
+    : [];
+  
+  // Merge all messages in the right order
+  let allMessages: Message[] = [];
+  if (systemMessage.length > 0) {
+    allMessages.push(systemMessage[0]);
+  }
+  
+  // Interleave user and assistant messages
+  for (let i = 0; i < Math.max(userMessages.length, assistantMessages.length); i++) {
+    if (i < userMessages.length) allMessages.push(userMessages[i]);
+    if (i < assistantMessages.length) allMessages.push(assistantMessages[i]);
+  }
+  
+  // Add the current user input
+  const updated: Message[] = [...allMessages, { role: 'user', content: userInput }];
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -20,7 +51,6 @@ export async function sendAnswer(chatId: string, userInput: string) {
   });
 
   const reply = completion.choices[0].message!;
-
   const responseText = reply.content ?? '';
 
   const parsed = JSON.parse(
@@ -31,13 +61,24 @@ export async function sendAnswer(chatId: string, userInput: string) {
       .trim()
   );
 
-  // ✅ Normalize GPT reply for your session store
+  // Normalize GPT reply
   const normalizedReply = {
-    role: reply.role as 'assistant', // safe cast
+    role: reply.role as 'assistant',
     content: reply.content ?? '',
   };
-
-  updateSession(chatId, [...updated, normalizedReply]);
+  
+  // Update the story context with new content
+  const updatedStory = [...context.story, normalizedReply.content];
+  
+  // Extract choices if available in the parsed response
+  const choices = parsed.choices || [];
+  
+  // Update the story context in Redis
+  await updateStoryContext(chatId, {
+    story: updatedStory,
+    lastChoices: choices,
+    lastQuestion: parsed.para || '',
+  });
 
   return parsed;
 }
