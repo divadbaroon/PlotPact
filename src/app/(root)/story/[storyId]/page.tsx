@@ -63,7 +63,6 @@ const ChatInterface: React.FC = () => {
 
   const [constraints, setConstraints] = useState<Constraint[]>([]);
   const [newConstraints, setNewConstraints] = useState<Constraint[]>([]);
-  const [constraintsLoading, setConstraintsLoading] = useState<boolean>(false);
 
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
@@ -143,7 +142,6 @@ const ChatInterface: React.FC = () => {
           setLoading(false);
           
           // Use constraints loading for constraint generation
-          setConstraintsLoading(true);
           console.log('About to generate constraints for:', [data.para]);
           const newConstraints = await generateConstraints(
             [data.para],
@@ -152,7 +150,6 @@ const ChatInterface: React.FC = () => {
           console.log('Received New constraints:', newConstraints);
           setNewConstraints(newConstraints);
           setConstraints((prev) => [...prev, ...newConstraints]);
-          setConstraintsLoading(false);
         } else {
           setLoading(false);
         }
@@ -164,7 +161,6 @@ const ChatInterface: React.FC = () => {
       } catch (error) {
         console.error('Error initializing chat:', error);
         setLoading(false);
-        setConstraintsLoading(false);
       }
     };
 
@@ -211,7 +207,6 @@ const ChatInterface: React.FC = () => {
         setLoading(false);
         
         // Use a separate loading state for constraint generation
-        setConstraintsLoading(true);
         console.log('About to generate constraints for new paragraph...');
         const newConstraints = await generateConstraints(
           [...paras, data.para],
@@ -221,7 +216,6 @@ const ChatInterface: React.FC = () => {
         console.log('Received new constraints:', newConstraints);
         setNewConstraints(newConstraints);
         setConstraints((prev) => [...prev, ...newConstraints]);
-        setConstraintsLoading(false);
         setIsIncorrect(false);
       } else {
         setIsIncorrect(true);
@@ -240,7 +234,6 @@ const ChatInterface: React.FC = () => {
     } catch (error) {
       console.error('Error sending answer:', error);
       setLoading(false);
-      setConstraintsLoading(false);
     }
   };
 
