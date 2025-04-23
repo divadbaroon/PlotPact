@@ -18,12 +18,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import MultipleChoiceBox from '@/components/MultipleChoiceBox';
-import { startChatStory } from '@/app/actions/startChatGPT';
-import { sendAnswer } from '@/app/actions/sendAnswerGPT';
+import { startChatStory } from '@/lib/actions/startChatGPT';
+import { sendAnswer } from '@/lib/actions/sendAnswerGPT';
 import {
   generateConstraints,
   verifyContent,
-} from '@/app/actions/constraintManager';
+} from '@/lib/actions/constraintManager';
 
 import type {
   StoryResponse,
@@ -31,11 +31,12 @@ import type {
   InteractionMode,
   Violation,
   ViolationState,
-  // ChatInterfaceProps,
 } from '@/types';
 
 import knight from '../../../../../public/story-images/knight.jpg';
 import lila from '../../../../../public/story-images/lila.png';
+
+import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 
 const ChatInterface: React.FC = () => {
   const params = useParams();
@@ -66,9 +67,9 @@ const ChatInterface: React.FC = () => {
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>(
-    'all'
-  );
+  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all');
+  
+  const [constraintFilter, setConstraintFilter] = useState<string>('all');
 
   let storyDetails = {
     storyImg: knight,
@@ -160,14 +161,18 @@ const ChatInterface: React.FC = () => {
     initChat();
   }, []);
 
-  // Handle user input
+  // Handle user input with enhanced constraint handling
   const handleSubmit = async (input: string) => {
     if (!input || !chatId || eos) return;
 
     try {
       console.log('Verifying content against constraints:', constraints);
-      // First verify against constraints
-      const verificationResult = await verifyContent(input, paras, constraints);
+      // Apply creativity factor to verification
+      const verificationResult = await verifyContent(
+        input,
+        paras,
+        constraints
+      );
       console.log('Verification result:', verificationResult);
 
       if (!verificationResult.isValid) {
@@ -191,7 +196,6 @@ const ChatInterface: React.FC = () => {
 
       if (data.para) {
         streamText(data.para);
-        // Generate new constraints based on the new content
         console.log('About to generate constraints for new paragraph...');
         const newConstraints = await generateConstraints(
           [...paras, data.para],
@@ -259,255 +263,6 @@ const ChatInterface: React.FC = () => {
       </Card>
     );
 
-  // Enhanced Constraints Panel Component
-  const EnhancedConstraintsPanel = () => {
-    return (
-      <div className='bg-white border rounded-lg shadow-md overflow-hidden'>
-        {/* Tab Navigation */}
-        <div className='flex border-b'>
-          <button
-            className={`flex-1 px-4 py-2 text-sm font-medium cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-gray-50 border-b-2 border-indigo-500'
-                : 'text-gray-600 hover:bg-gray-50'
-            } transition-all duration-200 hover:shadow-sm`}
-            onClick={() => setActiveTab('all')}
-          >
-            <div className='flex items-center justify-center gap-2'>
-              <BookOpen
-                className={`h-4 w-4 ${
-                  activeTab === 'all' ? 'text-indigo-600' : ''
-                } transition-colors duration-200`}
-              />
-              <span className={activeTab === 'all' ? 'text-indigo-700' : ''}>
-                All Constraints
-              </span>
-              <Badge
-                variant='outline'
-                className={`ml-1 ${
-                  activeTab === 'all'
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'bg-gray-100'
-                } transition-colors duration-200`}
-              >
-                {constraints.length}
-              </Badge>
-            </div>
-          </button>
-
-          <button
-            className={`flex-1 px-4 py-2 text-sm font-medium cursor-pointer ${
-              activeTab === 'new'
-                ? 'bg-gray-50 border-b-2 border-green-500'
-                : 'text-gray-600 hover:bg-gray-50'
-            } transition-all duration-200 hover:shadow-sm`}
-            onClick={() => setActiveTab('new')}
-          >
-            <div className='flex items-center justify-center gap-2'>
-              <CheckCircle2
-                className={`h-4 w-4 ${
-                  activeTab === 'new' ? 'text-green-600' : ''
-                } transition-colors duration-200`}
-              />
-              <span className={activeTab === 'new' ? 'text-green-700' : ''}>
-                New Constraints
-              </span>
-              {newConstraints.length > 0 && (
-                <Badge
-                  variant='outline'
-                  className={`ml-1 ${
-                    activeTab === 'new'
-                      ? 'bg-green-50 text-green-700'
-                      : 'bg-gray-100'
-                  } transition-colors duration-200`}
-                >
-                  {newConstraints.length}
-                </Badge>
-              )}
-            </div>
-          </button>
-
-          <button
-            className={`flex-1 px-4 py-2 text-sm font-medium cursor-pointer ${
-              activeTab === 'violations'
-                ? 'bg-red-50 border-b-2 border-red-500'
-                : violationsList.length > 0
-                ? 'text-red-700 hover:bg-red-50 animate-pulse'
-                : 'text-gray-600 hover:bg-gray-50'
-            } transition-all duration-200 hover:shadow-sm`}
-            onClick={() => setActiveTab('violations')}
-          >
-            <div className='flex items-center justify-center gap-2'>
-              <AlertCircle
-                className={`h-4 w-4 ${
-                  activeTab === 'violations' || violationsList.length > 0
-                    ? 'text-red-600'
-                    : ''
-                } transition-colors duration-200`}
-              />
-              <span
-                className={activeTab === 'violations' ? 'text-red-700' : ''}
-              >
-                Violations
-              </span>
-              {violationsList.length > 0 && (
-                <Badge
-                  variant='destructive'
-                  className='ml-1 bg-red-600 text-white'
-                >
-                  {violationsList.length}
-                </Badge>
-              )}
-            </div>
-          </button>
-        </div>
-
-        {/* Content Area */}
-        <div className='max-h-[60vh] overflow-y-auto p-6'>
-          {activeTab === 'all' && (
-            <div className='space-y-3'>
-              {constraints.length === 0 ? (
-                <div className='text-center py-12 px-8'>
-                  <div className='bg-gray-50 rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200'>
-                    <BookOpen className='h-16 w-16 text-gray-300 mx-auto mb-4' />
-                    <h3 className='text-lg font-medium text-gray-700 mb-3'>
-                      No Constraints Yet
-                    </h3>
-                    <p className='text-gray-500 max-w-xl mx-auto'>
-                      As your story progresses, important details will be
-                      tracked here to maintain consistency.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                constraints.map((constraint, index) => (
-                  <div
-                    key={index}
-                    className='p-3 bg-white rounded-md shadow-sm border border-gray-100 hover:border-indigo-300 transition-colors hover:shadow-md hover:bg-indigo-50 cursor-default'
-                  >
-                    <div className='flex items-start'>
-                      <div className='p-1 bg-indigo-50 rounded-full mr-3 mt-1'>
-                        <BookOpen className='h-4 w-4 text-indigo-500' />
-                      </div>
-                      <div>
-                        <p className='font-medium text-gray-900 text-sm'>
-                          {constraint.description}
-                        </p>
-                        <p className='text-xs text-gray-600 mt-1'>
-                          {constraint.reason}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === 'new' && (
-            <div className='space-y-3'>
-              {newConstraints.length === 0 ? (
-                <div className='text-center py-12 px-8'>
-                  <div className='bg-gray-50 rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200'>
-                    <CheckCircle2 className='h-16 w-16 text-gray-300 mx-auto mb-4' />
-                    <h3 className='text-lg font-medium text-gray-700 mb-3'>
-                      No New Constraints
-                    </h3>
-                    <p className='text-gray-500 max-w-xl mx-auto'>
-                      New story constraints will appear here when they&apos;re
-                      discovered in your latest additions.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                newConstraints.map((constraint, index) => (
-                  <div
-                    key={index}
-                    className='p-3 bg-green-50 rounded-md shadow-sm border border-green-100 hover:border-green-300 hover:bg-green-100 transition-colors hover:shadow-md cursor-default'
-                  >
-                    <div className='flex items-start'>
-                      <div className='p-1 bg-green-100 rounded-full mr-3 mt-1'>
-                        <CheckCircle2 className='h-4 w-4 text-green-600' />
-                      </div>
-                      <div>
-                        <p className='font-medium text-gray-900 text-sm'>
-                          {constraint.description}
-                        </p>
-                        <p className='text-xs text-gray-600 mt-1'>
-                          {constraint.reason}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === 'violations' && (
-            <div className='space-y-4'>
-              {violationsList.length === 0 ? (
-                <div className='text-center py-12 px-8'>
-                  <div className='bg-gray-50 rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200'>
-                    <AlertCircle className='h-16 w-16 text-gray-300 mx-auto mb-4' />
-                    <h3 className='text-lg font-medium text-gray-700 mb-3'>
-                      No Violations Recorded
-                    </h3>
-                    <p className='text-gray-500 max-w-xl mx-auto'>
-                      Your story is progressing smoothly without any consistency
-                      issues. When violations occur, they will appear here with
-                      detailed explanations.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                violationsList.map((v, i) => (
-                  <div
-                    key={i}
-                    className='border-2 border-red-300 rounded-md bg-red-50 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-red-400'
-                  >
-                    <div className='p-3 bg-red-100'>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <AlertCircle className='h-5 w-5 text-red-600' />
-                        <p className='font-semibold text-sm text-red-800'>
-                          Rejected Input:
-                        </p>
-                      </div>
-                      <p className='text-gray-800 text-sm mt-1 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors'>
-                        {v.sentContent}
-                      </p>
-                    </div>
-                    <div className='p-3'>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <AlertCircle className='h-5 w-5 text-red-600' />
-                        <p className='font-semibold text-sm text-red-800'>
-                          Violations ({v.violations.length}):
-                        </p>
-                      </div>
-                      {v.violations.map((violation, j) => (
-                        <div
-                          key={j}
-                          className='mb-3 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors last:mb-0 hover:bg-red-50'
-                        >
-                          <p className='text-sm font-semibold text-red-700 mb-1'>
-                            {violation.constraintType}
-                          </p>
-                          <p className='text-sm text-gray-700'>
-                            {violation.explanation}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className='flex h-screen bg-gray-50'>
       <div className='flex-1 flex flex-col border-r border-gray-200 bg-white'>
@@ -555,11 +310,6 @@ const ChatInterface: React.FC = () => {
             </h1>
 
             <div className='aspect-video overflow-hidden rounded-lg shadow-md mb-8 mx-auto hover:shadow-lg transition-all duration-300 relative h-64 w-full'>
-              {/* <img
-                src='/story-images/lila.png'
-                alt='Story Banner'
-                className='object-cover w-full h-full'
-              /> */}
               <Image
                 src={storyDetails.storyImg}
                 alt='Story Image'
@@ -682,16 +432,24 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
 
-      {/* side panel */}
-      <div
-        className={`${
-          panelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
-        } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
-      >
-        <div className='p-4 h-full flex flex-col'>
-          <div className='flex-1 overflow-hidden'>
-            <EnhancedConstraintsPanel />
-          </div>
+     {/* side panel */}
+    <div
+      className={`${
+        panelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
+      } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
+    >
+      <div className='p-4 h-full flex flex-col'>
+        <div className='flex-1 overflow-hidden'>
+          <ConstraintsPanel
+            constraints={constraints}
+            newConstraints={newConstraints}
+            violationsList={violationsList}
+            constraintFilter={constraintFilter}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setConstraintFilter={setConstraintFilter}
+          />
+        </div>
 
           {/* Additional story guidance */}
           <div className='mt-4 pt-4 border-t border-gray-200'>
