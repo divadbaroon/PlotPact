@@ -1,7 +1,7 @@
 'use server';
 
 import OpenAI from 'openai';
-import { getStoryContext, updateStoryContext, debugStoryContext } from '@/lib/sessionStore';
+import { getStoryContext, updateStoryContext, debugStoryContext } from '@/lib/actions/sessionStore';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY

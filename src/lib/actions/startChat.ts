@@ -2,7 +2,7 @@
 
 import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
-import { setStoryContext, debugStoryContext } from '@/lib/sessionStore';
+import { setStoryContext, debugStoryContext } from '@/lib/actions/sessionStore';
 
 import { StoryResponse } from '@/types';
 
