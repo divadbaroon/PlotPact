@@ -126,7 +126,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
             <div className="flex flex-wrap gap-1 items-center">
               <Badge 
                 variant={constraintFilter === 'all' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-gray-100"
+                className="cursor-pointer"
                 onClick={() => setConstraintFilter('all')}
               >
                 All
@@ -135,7 +135,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
               <div className="relative group inline-block">
                 <Badge 
                   variant={constraintFilter === 'exclusionary' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer"
                   onClick={() => setConstraintFilter('exclusionary')}
                 >
                   Exclusionary
@@ -148,7 +148,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
               <div className="relative group inline-block">
                 <Badge 
                   variant={constraintFilter === 'focusing' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer"
                   onClick={() => setConstraintFilter('focusing')}
                 >
                   Focusing
@@ -161,7 +161,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
               <div className="relative group inline-block">
                 <Badge 
                   variant={constraintFilter === 'channel' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer"
                   onClick={() => setConstraintFilter('channel')}
                 >
                   Channel
@@ -174,7 +174,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
               <div className="relative group inline-block">
                 <Badge 
                   variant={constraintFilter === 'anchor' ? 'default' : 'outline'}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer"
                   onClick={() => setConstraintFilter('anchor')}
                 >
                   Anchor
