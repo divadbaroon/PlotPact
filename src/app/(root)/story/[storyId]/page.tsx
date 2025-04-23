@@ -63,6 +63,7 @@ const ChatInterface: React.FC = () => {
 
   const [constraints, setConstraints] = useState<Constraint[]>([]);
   const [newConstraints, setNewConstraints] = useState<Constraint[]>([]);
+  const [constraintsLoading, setConstraintsLoading] = useState<boolean>(false);
 
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
@@ -131,12 +132,18 @@ const ChatInterface: React.FC = () => {
     const initChat = async () => {
       try {
         setLoading(true);
-
+    
         const data = (await startChatStory(storyId)) as StoryResponse;
         setChatId(data.chatId);
-
+    
         if (data.para) {
           streamText(data.para);
+          
+          // Set loading to false once streaming starts
+          setLoading(false);
+          
+          // Use constraints loading for constraint generation
+          setConstraintsLoading(true);
           console.log('About to generate constraints for:', [data.para]);
           const newConstraints = await generateConstraints(
             [data.para],
@@ -145,16 +152,19 @@ const ChatInterface: React.FC = () => {
           console.log('Received New constraints:', newConstraints);
           setNewConstraints(newConstraints);
           setConstraints((prev) => [...prev, ...newConstraints]);
+          setConstraintsLoading(false);
+        } else {
+          setLoading(false);
         }
-
+    
         setQuestion(data.question || null);
         setChoices(data.choices || []);
         setEos(!!data.eos);
         setIsIncorrect(false);
-        setLoading(false);
       } catch (error) {
         console.error('Error initializing chat:', error);
         setLoading(false);
+        setConstraintsLoading(false);
       }
     };
 
@@ -164,7 +174,7 @@ const ChatInterface: React.FC = () => {
   // Handle user input with enhanced constraint handling
   const handleSubmit = async (input: string) => {
     if (!input || !chatId || eos) return;
-
+  
     try {
       console.log('Verifying content against constraints:', constraints);
       // Apply creativity factor to verification
@@ -174,10 +184,10 @@ const ChatInterface: React.FC = () => {
         constraints
       );
       console.log('Verification result:', verificationResult);
-
+  
       if (!verificationResult.isValid) {
         setViolations(verificationResult.violations);
-
+  
         setViolationsList((prev) => [
           ...prev,
           {
@@ -185,45 +195,52 @@ const ChatInterface: React.FC = () => {
             sentContent: input,
           },
         ]);
-
+  
         return;
       }
-
+  
       setLoading(true);
       setViolations([]);
-
+  
       const data = await sendAnswer(chatId, input);
-
+  
       if (data.para) {
         streamText(data.para);
+        
+        // Set loading to false once streaming starts
+        setLoading(false);
+        
+        // Use a separate loading state for constraint generation
+        setConstraintsLoading(true);
         console.log('About to generate constraints for new paragraph...');
         const newConstraints = await generateConstraints(
           [...paras, data.para],
           constraints
         );
-
+  
         console.log('Received new constraints:', newConstraints);
         setNewConstraints(newConstraints);
         setConstraints((prev) => [...prev, ...newConstraints]);
+        setConstraintsLoading(false);
         setIsIncorrect(false);
       } else {
         setIsIncorrect(true);
+        setLoading(false);
       }
-
+  
       setQuestion(data.question);
       setChoices(data.choices);
       setEos(data.eos);
       setSelectedChoice('');
       setCustomInput('');
-
+  
       if (!isIncorrect) {
         setMode('freeform');
       }
-
-      setLoading(false);
     } catch (error) {
       console.error('Error sending answer:', error);
       setLoading(false);
+      setConstraintsLoading(false);
     }
   };
 
