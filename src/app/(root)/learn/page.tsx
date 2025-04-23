@@ -4,8 +4,8 @@ import React, { useEffect, useState, useRef } from 'react';
 // import { Message, Choice } from '@/types';
 import MultipleChoiceBox from '@/components/MultipleChoiceBox';
 
-import { startChat } from '@/app/actions/startChat';
-import { sendAnswer } from '@/app/actions/sendAnswer';
+import { startChat } from '@/lib/actions/startChat';
+import { sendAnswer } from '@/lib/actions/sendAnswer';
 
 const ChatInterface: React.FC = () => {
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
