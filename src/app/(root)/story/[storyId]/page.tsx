@@ -54,7 +54,7 @@ const ChatInterface: React.FC = () => {
   const [isIncorrect, setIsIncorrect] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [mode, setMode] = useState<InteractionMode>('idle');
+  const [mode, setMode] = useState<InteractionMode>('freeform');
   const [customInput, setCustomInput] = useState('');
 
   const [paras, setParas] = useState<string[]>([]);
@@ -217,7 +217,7 @@ const ChatInterface: React.FC = () => {
       setCustomInput('');
 
       if (!isIncorrect) {
-        setMode('idle');
+        setMode('freeform');
       }
 
       setLoading(false);
@@ -353,19 +353,6 @@ const ChatInterface: React.FC = () => {
                     Type Response
                   </Button>
                   <Button
-                    onClick={() => setMode('multipleChoice')}
-                    variant={
-                      mode === 'multipleChoice' ? 'default' : 'secondary'
-                    }
-                    className={`hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer ${
-                      mode === 'multipleChoice'
-                        ? 'hover:bg-indigo-600'
-                        : 'hover:bg-gray-200'
-                    }`}
-                  >
-                    Show Options
-                  </Button>
-                  <Button
                     onClick={() => handleSubmit('continue the story')}
                     variant='secondary'
                     className='hover:bg-gray-200 transition-colors duration-200 hover:shadow-md transform hover:-translate-y-0.5 cursor-pointer'
@@ -404,12 +391,12 @@ const ChatInterface: React.FC = () => {
                       className='min-h-[100px] mb-3 resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors'
                     />
                     <div className='flex justify-end'>
-                      <Button
-                        type='submit'
-                        className='bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-200 hover:shadow-md transform hover:-translate-y-0.5 cursor-pointer'
-                      >
-                        Send
-                      </Button>
+                    <Button
+                      type='submit'
+                      className='bg-black hover:bg-gray-800 text-white transition-colors duration-200 hover:shadow-md transform hover:-translate-y-0.5 cursor-pointer'
+                    >
+                      Send
+                    </Button>
                     </div>
                   </form>
                 )}
