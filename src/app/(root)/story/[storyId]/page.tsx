@@ -356,7 +356,7 @@ const ChatInterface: React.FC = () => {
                     variant={mode === 'freeform' ? 'default' : 'secondary'}
                     className={`hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer ${
                       mode === 'freeform'
-                        ? 'hover:bg-indigo-600'
+                        ? 'hover:bg-black-600'
                         : 'hover:bg-gray-200'
                     }`}
                   >
