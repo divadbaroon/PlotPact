@@ -1,9 +1,9 @@
 'use server';
 
 import { OpenAI } from 'openai';
-import { getStoryContext, updateStoryContext } from '@/lib/sessionStore';
+import { getStoryContext, updateStoryContext } from '@/lib/actions/sessionStore';
 
-import type { Message } from '@/lib/sessionStoreNew';
+import { GPTMessage } from "@/types"
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -12,17 +12,17 @@ export async function sendAnswer(chatId: string, userInput: string) {
   const context = await getStoryContext(chatId);
   if (!context) throw new Error('Session not found');
 
-  const systemMessage: Message[] = context.originalPrompt 
+  const systemMessage: GPTMessage[] = context.originalPrompt 
     ? [{ role: 'system', content: context.originalPrompt }] 
     : [];
   
   // Add previous messages based on story content
-  const assistantMessages: Message[] = context.story.map(content => ({
+  const assistantMessages: GPTMessage[] = context.story.map(content => ({
     role: 'assistant',
     content,
   }));
 
-  const userMessages: Message[] = assistantMessages.length > 0 
+  const userMessages: GPTMessage[] = assistantMessages.length > 0 
     ? new Array(assistantMessages.length).fill('').map((_, index) => ({
         role: 'user',
         content: index === 0 ? context.originalPrompt || 'Start story' : 'Continue',
@@ -30,7 +30,7 @@ export async function sendAnswer(chatId: string, userInput: string) {
     : [];
   
   // Merge all messages in the right order
-  const allMessages: Message[] = [];
+  const allMessages: GPTMessage[] = [];
   if (systemMessage.length > 0) {
     allMessages.push(systemMessage[0]);
   }
@@ -42,7 +42,7 @@ export async function sendAnswer(chatId: string, userInput: string) {
   }
   
   // Add the current user input
-  const updated: Message[] = [...allMessages, { role: 'user', content: userInput }];
+  const updated: GPTMessage[] = [...allMessages, { role: 'user', content: userInput }];
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',

@@ -2,11 +2,10 @@
 
 import { randomUUID } from 'crypto';
 import { OpenAI } from 'openai';
-import { setStoryContext, updateStoryContext } from '@/lib/sessionStore';
+import { setStoryContext, updateStoryContext } from '@/lib/actions/sessionStore';
 import { INITIAL_STORIES } from '@/lib/constants/stories';
 
-import { StoryContext } from "@/types";
-import type { Message } from '@/lib/sessionStoreNew';
+import { StoryContext, GPTMessage } from "@/types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -41,7 +40,7 @@ export async function startChatStory(storyId: string) {
   if (storyId == '1') prompt = initialPrompt + storyPlot1;
   else prompt = initialPrompt + storyPlot2;
 
-  const history: Message[] = [
+  const history: GPTMessage[] = [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: `${prompt}` },
   ];
@@ -59,7 +58,7 @@ export async function startChatStory(storyId: string) {
     content: reply.content ?? '',
   };
 
-  const fullHistory: Message[] = [...history, normalizedReply];
+  const fullHistory: GPTMessage[] = [...history, normalizedReply];
 
   // Create new session with Redis
   await createSession(chatId, systemPrompt);
@@ -90,7 +89,7 @@ async function createSession(id: string, systemPrompt?: string) {
 }
 
 // Helper function to update a session (implementation for Redis)
-async function updateSession(id: string, messages: Message[]) {
+async function updateSession(id: string, messages: GPTMessage[]) {
   // Extract story content from the messages
   const storyContent = messages
     .filter(msg => msg.role === 'assistant')
