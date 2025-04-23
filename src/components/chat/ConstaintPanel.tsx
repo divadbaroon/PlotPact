@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, CheckCircle2, AlertCircle, Filter } from 'lucide-react';
+import { BookOpen, CheckCircle2, AlertCircle, Filter, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Constraint, ViolationState, ConstraintsPanelProps, ConstraintCardProps } from '@/types';
 
@@ -123,67 +123,76 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
               <span className="text-xs font-medium text-gray-700">Filter by:</span>
             </div>
             
-            <div className="flex flex-wrap gap-1">
-            <Badge 
-              variant={constraintFilter === 'all' ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => setConstraintFilter('all')}
-            >
-              All
-            </Badge>
-            
-            <div className="relative group inline-block">
+            <div className="flex flex-wrap gap-1 items-center">
               <Badge 
-                variant={constraintFilter === 'exclusionary' ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setConstraintFilter('exclusionary')}
+                variant={constraintFilter === 'all' ? 'default' : 'outline'}
+                className="cursor-pointer hover:bg-gray-100"
+                onClick={() => setConstraintFilter('all')}
               >
-                Exclusionary
+                All
               </Badge>
-              <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
-                Rules about what NOT to do in the story
+              
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'exclusionary' ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => setConstraintFilter('exclusionary')}
+                >
+                  Exclusionary
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Rules about what NOT to do in the story
+                </div>
               </div>
-            </div>
-            
-            <div className="relative group inline-block">
-              <Badge 
-                variant={constraintFilter === 'focusing' ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setConstraintFilter('focusing')}
+              
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'focusing' ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => setConstraintFilter('focusing')}
+                >
+                  Focusing
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Rules about what MUST be included
+                </div>
+              </div>
+              
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'channel' ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => setConstraintFilter('channel')}
+                >
+                  Channel
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Broad constraints about setting or time period
+                </div>
+              </div>
+              
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'anchor' ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => setConstraintFilter('anchor')}
+                >
+                  Anchor
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Specific elements like characters or objects
+                </div>
+              </div>
+              
+              {/* Add Plus Icon Button as the last item in the filters row */}
+              <button 
+                className="ml-1 p-1 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center ml-25 cursor-pointer"
+                onClick={() => console.log('Create constraint clicked')}
+                title="Create new constraint"
               >
-                Focusing
-              </Badge>
-              <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
-                Rules about what MUST be included
-              </div>
+                <Plus className="h-4 w-4 text-gray-700" />
+              </button>
             </div>
-            
-            <div className="relative group inline-block">
-              <Badge 
-                variant={constraintFilter === 'channel' ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setConstraintFilter('channel')}
-              >
-                Channel
-              </Badge>
-              <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
-                Broad constraints about setting or time period
-              </div>
-            </div>
-            
-            <div className="relative group inline-block">
-              <Badge 
-                variant={constraintFilter === 'anchor' ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setConstraintFilter('anchor')}
-              >
-                Anchor
-              </Badge>
-              <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
-                Specific elements like characters or objects
-              </div>
-            </div>
-          </div>
           </div>
         </div>
       )}
