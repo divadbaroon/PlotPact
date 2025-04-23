@@ -1,3 +1,41 @@
+export type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
+
+export type ConstraintFunction = 'exclusionary' | 'focusing';
+export type ConstraintType = 'channel' | 'anchor';
+export type ConstraintFlexibility = 'fixed' | 'faux-fixed' | 'flexible';
+
+export interface Constraint {
+  id: string;
+  function: ConstraintFunction;
+  type: ConstraintType;
+  flexibility: ConstraintFlexibility;
+  description: string;
+  reason: string;
+  examples: {
+    valid: string[];
+    invalid?: string[];
+  };
+}
+
+export interface Violation {
+  constraintType: string;
+  explanation: string;
+}
+
+export interface ViolationState {
+  violations: Violation[];
+  sentContent: string;
+}
+
+export interface StoryResponse {
+  chatId: string;
+  para?: string;
+  question?: string;
+  choices?: string[];
+  eos?: string | boolean;
+  constraints?: Constraint[];
+}
+
 export type MessageSender = 'user' | 'ai';
 
 export interface Message {
@@ -19,36 +57,6 @@ export interface Choice {
   selected?: string;
 }
 
-export type StoryResponse = {
-  chatId: string;
-  para?: string;
-  question?: string;
-  choices?: string[];
-  eos?: string | boolean;
-  constraints?: {
-    type: string;
-    description: string;
-    reason: string;
-  }[];
-};
-
-export type Constraint = {
-  type: string;
-  description: string;
-  reason: string;
-};
-
-export type Violation = {
-  constraintType: string;
-  explanation: string;
-};
-
-export type ViolationState = {
-  violations: Violation[];
-  sentContent: string;
-};
-
-export type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
 
 export type StoryContext = {
   story: string[];
@@ -61,3 +69,21 @@ export type StoryContext = {
 export type ChatInterfaceProps = {
   storyId: string;
 };
+
+export interface ConstraintsPanelProps {
+  constraints: Constraint[];
+  newConstraints: Constraint[];
+  violationsList: ViolationState[];
+  constraintFilter: string;
+  activeTab: 'all' | 'new' | 'violations';
+  setActiveTab: (tab: 'all' | 'new' | 'violations') => void;
+  setConstraintFilter: (filter: string) => void;
+  onEditConstraint?: (constraint: Constraint) => void;
+}
+
+
+export interface ConstraintCardProps {
+  constraint: Constraint;
+  isNew: boolean;
+  onEditConstraint?: (constraint: Constraint) => void;
+}
