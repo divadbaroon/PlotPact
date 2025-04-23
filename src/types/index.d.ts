@@ -81,9 +81,13 @@ export interface ConstraintsPanelProps {
   onEditConstraint?: (constraint: Constraint) => void;
 }
 
-
 export interface ConstraintCardProps {
   constraint: Constraint;
   isNew: boolean;
   onEditConstraint?: (constraint: Constraint) => void;
 }
+
+export type GPTMessage = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+};
