@@ -38,6 +38,8 @@ import lila from '../../../../../public/story-images/lila.png';
 
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 
+import ConstraintCreator from '@/components/chat/ConstraintCreator';
+
 const ChatInterface: React.FC = () => {
   const params = useParams();
   const storyId = params.storyId as string;
@@ -46,6 +48,7 @@ const ChatInterface: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [panelOpen, setPanelOpen] = useState<boolean>(false);
+  const [createConstraintPanelOpen, setCreateConstraintPanelOpen] = useState<boolean>(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
@@ -238,7 +241,13 @@ const ChatInterface: React.FC = () => {
   };
 
   const togglePanel = (): void => {
+    setCreateConstraintPanelOpen(false);
     setPanelOpen(!panelOpen);
+  };
+
+  const toggleAddConstraint = (): void => {
+    setPanelOpen(false);
+    setCreateConstraintPanelOpen(!createConstraintPanelOpen);
   };
 
   // Show user why their input was not accepted
@@ -288,6 +297,11 @@ const ChatInterface: React.FC = () => {
 
           {/* Right side controls with hover effect */}
           <div className='flex items-center gap-2'>
+            <Button
+            onClick={toggleAddConstraint}
+            >
+              Add Constraint
+            </Button>
             <Button
               variant={violationsList.length > 0 ? 'destructive' : 'outline'}
               size='sm'
@@ -469,6 +483,28 @@ const ChatInterface: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* side panel */}
+      <div
+        className={`${
+         createConstraintPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
+        } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
+      >
+        <div className='p-4 h-full flex flex-col'>
+          <div className='flex-1 overflow-hidden'>
+            <ConstraintCreator
+              // constraints={constraints}
+              // newConstraints={newConstraints}
+              // violationsList={violationsList}
+              // constraintFilter={constraintFilter}
+              // activeTab={activeTab}
+              // setActiveTab={setActiveTab}
+              // setConstraintFilter={setConstraintFilter}
+            />
+          </div>
+          </div>
+        </div>
+
     </div>
   );
 };

@@ -2,7 +2,7 @@ export type InteractionMode = 'idle' | 'multipleChoice' | 'freeform';
 
 export type ConstraintFunction = 'exclusionary' | 'focusing';
 export type ConstraintType = 'channel' | 'anchor';
-export type ConstraintFlexibility = 'fixed' | 'faux-fixed' | 'flexible';
+export type ConstraintFlexibility = 'fixed' | 'flexible';
 
 export interface Constraint {
   id: string;
@@ -56,7 +56,6 @@ export interface Choice {
   options: string[];
   selected?: string;
 }
-
 
 export type StoryContext = {
   story: string[];
