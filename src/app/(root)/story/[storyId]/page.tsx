@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   BookOpen,
   ScrollText,
-  ArrowDownCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,7 +46,6 @@ const ChatInterface: React.FC = () => {
   const [chatId, setChatId] = useState<string | null>(null);
   const [plot, setPlot] = useState<string>('');
   const [eos, setEos] = useState<boolean>(false);
-  const [isIncorrect, setIsIncorrect] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const [paras, setParas] = useState<string[]>([]);
@@ -138,7 +136,6 @@ const ChatInterface: React.FC = () => {
         }
         
         setEos(!!data.eos);
-        setIsIncorrect(false);
       } catch (error) {
         console.error('Error initializing chat:', error);
         setLoading(false);
@@ -163,9 +160,7 @@ const ChatInterface: React.FC = () => {
         
         // Reset loading once streaming starts
         setLoading(false);
-        setIsIncorrect(false);
       } else {
-        setIsIncorrect(true);
         setLoading(false);
       }
       

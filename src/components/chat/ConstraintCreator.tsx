@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Info, Dice5, RefreshCcw, Trash2, CheckCircle2 } from 'lucide-react';
 import ConstraintCard from '@/components/chat/ConstraintCard';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Constraint } from '@/types';
 
 interface ConstraintCreatorProps {
