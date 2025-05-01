@@ -269,25 +269,43 @@ const ChatInterface: React.FC = () => {
       </Card>
     );
 
-  // Story Plot Display Component
+  // Story Plot Display
+  // Using hardcoded story plot for now
+
   const StoryPlotDisplay = () => {
-    if (!plot) return null;
+    const [isExpanded, setIsExpanded] = useState(false);
     
     return (
-      <Card className="mb-6 bg-gray-50 border border-gray-200 hover:shadow-md transition-all duration-200">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <ScrollText className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-gray-800">Story Plot</h2>
-          </div>
-          <p className="text-gray-700 bg-white p-4 rounded-md border border-gray-200 italic">
-            {plot}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="relative mt-4 mb-4"> 
+        <div className="flex justify-end mb-2"> 
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="hover:bg-gray-100 transition-colors"
+          >
+            {isExpanded ? 'Hide Plot' : 'Show Plot'}
+          </Button>
+        </div>
+        
+        <div className={`overflow-hidden transition-all duration-300 ${
+          isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <Card className="bg-gray-50 border border-gray-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ScrollText className="h-5 w-5 text-indigo-600" />
+                <h2 className="text-lg font-semibold text-gray-800">Story Plot</h2>
+              </div>
+              <p className="text-gray-700 bg-white p-4 rounded-md border border-gray-200 italic">
+                Lila discovers a mysterious wooden box on her doorstep, adorned with a brass dial and an ominous note: 'Turn the dial to the right number to save him.' With no clue who 'him' refers to—her brother, her father, or someone else—panic grips her. As she turns the box over, faint numbers etched along its edges hint at a hidden code. Racing against an unknown clock, she must decipher the message before it's too late. The story unfolds as a tense puzzle, blending suspense and urgency, where every second counts and the right number holds the key to salvation.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   };
-
   return (
     <div className='flex h-screen bg-gray-50'>
       <div className='flex-1 flex flex-col border-r border-gray-200 bg-white'>
@@ -348,7 +366,6 @@ const ChatInterface: React.FC = () => {
               />
             </div>
 
-            {/* Display the story plot if available */}
             <StoryPlotDisplay />
 
             <div className='prose max-w-none'>
