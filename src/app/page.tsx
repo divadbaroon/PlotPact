@@ -1,14 +1,68 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, BookOpen, Brain, Lightbulb, Users } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  ArrowRight, 
+  BookOpen, 
+  Brain, 
+  Lightbulb, 
+  Users, 
+  Edit, 
+  FilePlus2, 
+  Loader2,
+  CheckCircle,
+  ScrollText
+} from 'lucide-react';
 
-// import apollo13 from '../../public/story-images/apollo13.jpg';
 import knight from '../../public/story-images/knight.jpg';
 import lila from '../../public/story-images/lila.png';
 
 export default function Home() {
+  const router = useRouter();
+  const [customPlotDialogOpen, setCustomPlotDialogOpen] = useState(false);
+  const [customPlot, setCustomPlot] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [storyModeDialogOpen, setStoryModeDialogOpen] = useState(false);
+
+  const handleStartEmptyCanvas = () => {
+    setCustomPlotDialogOpen(true);
+  };
+
+  const handleSubmitCustomPlot = async () => {
+    if (!customPlot.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      // TODO: create API to create a new story
+      // For now just redirecting to template story
+      router.push('/story/1');
+    } catch (error) {
+      console.error('Error creating custom story:', error);
+    } finally {
+      setIsSubmitting(false);
+      setCustomPlotDialogOpen(false);
+    }
+  };
+
+  const handleTemplateStory = (storyId: string) => {
+    // Redirect to the selected template story
+    router.push(`/story/${storyId}`);
+  };
+
   return (
     <div className='flex flex-col min-h-screen'>
       {/* Hero Section */}
@@ -22,11 +76,13 @@ export default function Home() {
               Interactive Storytelling with Human-AI Constraint Negotiation
             </p>
             <div className='flex flex-col sm:flex-row gap-4 mt-8'>
-              <Link href='/story/1' className='group'>
-                <Button size='lg' className='gap-2'>
-                  Try Demo <ArrowRight className='h-4 w-4' />
-                </Button>
-              </Link>
+              <Button 
+                size='lg' 
+                className='gap-2'
+                onClick={() => setStoryModeDialogOpen(true)}
+              >
+                Start Writing <ArrowRight className='h-4 w-4' />
+              </Button>
 
               <Link href='/#problem' className='group'>
                 <Button size='lg' variant='outline' className='gap-2'>
@@ -39,7 +95,7 @@ export default function Home() {
       </section>
 
       {/* Featured Stories Section */}
-      <section className='py-16 px-4 sm:px-6 lg:px-8 bg-background'>
+      <section id="featured-stories" className='py-16 px-4 sm:px-6 lg:px-8 bg-background'>
         <div className='container mx-auto max-w-6xl'>
           <div className='text-center mb-12'>
             <h2 className='text-3xl font-bold mb-4'>Featured Stories</h2>
@@ -49,8 +105,11 @@ export default function Home() {
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-            {/* The Knight Story */}
-            <Link href='/story/1' className='group'>
+            {/* Lila Story */}
+            <div 
+              className='group cursor-pointer'
+              onClick={() => handleTemplateStory('1')}
+            >
               <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl h-full flex flex-col'>
                 <div className='relative h-64 w-full'>
                   <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
@@ -63,7 +122,6 @@ export default function Home() {
                 </div>
                 <div className='p-6 flex-grow'>
                   <h3 className='text-2xl font-bold mb-2 group-hover:text-primary transition-colors'>
-                    {/* The Last Shield: A Knight&apos;s Stand */}
                     The Box with the Brass Dial
                   </h3>
                   <p className='text-muted-foreground'>
@@ -74,10 +132,7 @@ export default function Home() {
                     someone else—panic grips her. As she turns the box over,
                     faint numbers etched along its edges hint at a hidden code.
                     Racing against an unknown clock, she must decipher the
-                    message before it&apos;s too late. The story unfolds as a
-                    tense puzzle, blending suspense and urgency, where every
-                    second counts and the right number holds the key to
-                    salvation.
+                    message before it&apos;s too late.
                   </p>
                 </div>
                 <div className='px-6 pb-6 pt-2'>
@@ -86,10 +141,13 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
 
-            {/* Dragon story */}
-            <Link href='/story/2' className='group'>
+            {/* Knight story */}
+            <div 
+              className='group cursor-pointer'
+              onClick={() => handleTemplateStory('0')}
+            >
               <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl h-full flex flex-col'>
                 <div className='relative h-64 w-full'>
                   <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
@@ -105,7 +163,7 @@ export default function Home() {
                     A Knight&apos;s Stand
                   </h3>
                   <p className='text-muted-foreground'>
-                    When the ancient dragon Malgrath descends upon the peaceful
+                  When the ancient dragon Malgrath descends upon the peaceful
                     village of Oakendale, retired knight Sir Brannen takes up
                     his rusted armor for one final battle to protect his home.
                     Experience the journey of a broken hero who must rediscover
@@ -120,40 +178,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </Link>
-
-            {/* Apollo 13 */}
-            {/* <Link href='/learn' className='group'>
-              <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl h-full flex flex-col'>
-                <div className='relative h-64 w-full'>
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
-                  <Image
-                    src={apollo13}
-                    alt='Apollo 13 spacecraft'
-                    fill
-                    className='object-cover'
-                  />
-                </div>
-                <div className='p-6 flex-grow'>
-                  <h3 className='text-2xl font-bold mb-2 group-hover:text-primary transition-colors'>
-                    The Apollo 13 Mission
-                  </h3>
-                  <p className='text-muted-foreground'>
-                    Apollo 13 was NASA&apos;s seventh crewed mission in the
-                    Apollo space program, launched on April 11, 1970. The
-                    spacecraft carried a crew of three astronauts: James Lovell,
-                    Jack Swigert, and Fred Haise. It was intended to be the
-                    third mission to land humans on the Moon. Fate had different
-                    plans.
-                  </p>
-                </div>
-                <div className='px-6 pb-6 pt-2'>
-                  <div className='inline-flex items-center text-primary font-medium'>
-                    Read story <ArrowRight className='ml-2 h-4 w-4' />
-                  </div>
-                </div>
-              </div>
-            </Link> */}
+            </div>
           </div>
         </div>
       </section>
@@ -342,6 +367,121 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Story Mode Selection Dialog */}
+      <Dialog open={storyModeDialogOpen} onOpenChange={setStoryModeDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Choose Your Story Mode</DialogTitle>
+            <DialogDescription>
+              Select how you want to start your story
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+            <Card 
+              className="cursor-pointer hover:border-primary transition-colors" 
+              onClick={handleStartEmptyCanvas}
+            >
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <Edit className="h-12 w-12 text-primary mb-4" />
+                <h3 className="text-lg font-medium mb-2">Start Empty Canvas</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create your own story plot and write from scratch
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className="cursor-pointer hover:border-primary transition-colors"
+              onClick={() => {
+                setStoryModeDialogOpen(false);
+                document.querySelector('#featured-stories')?.scrollIntoView({ 
+                  behavior: 'smooth' 
+                });
+              }}
+            >
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <FilePlus2 className="h-12 w-12 text-primary mb-4" />
+                <h3 className="text-lg font-medium mb-2">Use Template</h3>
+                <p className="text-sm text-muted-foreground">
+                  Continue a story from our featured templates
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStoryModeDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Plot Dialog */}
+      <Dialog 
+        open={customPlotDialogOpen} 
+        onOpenChange={(open) => {
+          // Only allow closing if not submitting
+          if (!isSubmitting) {
+            setCustomPlotDialogOpen(open);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create Your Story Plot</DialogTitle>
+            <DialogDescription>
+              Describe the setting, main characters, and central conflict of your story.
+              This will be used to generate initial constraints.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ScrollText className="h-5 w-5 text-primary" />
+              <h3 className="text-sm font-medium">Story Plot</h3>
+            </div>
+            <Textarea
+              value={customPlot}
+              onChange={(e) => setCustomPlot(e.target.value)}
+              placeholder="Describe your story plot here..."
+              className="min-h-[150px] mb-2"
+            />
+            <p className="text-xs text-muted-foreground">
+              Minimum 50 characters. More detailed plots will generate better constraints.
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setCustomPlotDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitCustomPlot}
+              disabled={isSubmitting || customPlot.length < 50}
+              className="gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Create Story
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
