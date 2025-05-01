@@ -327,7 +327,7 @@ const ChatInterface: React.FC = () => {
                     {violationsList.length}
                   </Badge>
                 )}
-                <span className='mr-1'>Story Guide</span>
+                <span className='mr-1'>View Constraints</span>
                 {panelOpen ? (
                   <ChevronRight className='h-4 w-4' />
                 ) : (
