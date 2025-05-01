@@ -34,6 +34,7 @@ export interface StoryResponse {
   choices?: string[];
   eos?: string | boolean;
   constraints?: Constraint[];
+  plot?: string;
 }
 
 export type MessageSender = 'user' | 'ai';
