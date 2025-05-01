@@ -2,9 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Info, Dice5, RefreshCcw, Trash2, CheckCircle2 } from 'lucide-react';
 import ConstraintCard from '@/components/chat/ConstraintCard';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Constraint } from '@/types';
 
-const ConstraintCreator: React.FC = () => {
+interface ConstraintCreatorProps {
+  onAddConstraint: (constraint: Constraint) => void;
+  onClose?: () => void;
+}
+
+const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({ 
+  onAddConstraint,
+  onClose 
+}) => {
   const [functionType, setFunctionType] = useState<
     Constraint['function'] | null
   >(null);
@@ -14,6 +24,10 @@ const ConstraintCreator: React.FC = () => {
   const [flexibility, setFlexibility] = useState<
     Constraint['flexibility'] | null
   >(null);
+  const [description, setDescription] = useState<string>('');
+  const [reason, setReason] = useState<string>('');
+  const [validExample, setValidExample] = useState<string>('');
+  const [invalidExample, setInvalidExample] = useState<string>('');
   const [generatedConstraint, setGeneratedConstraint] =
     useState<Constraint | null>(null);
   const [infoPopover, setInfoPopover] = useState<string | null>(null);
@@ -22,7 +36,7 @@ const ConstraintCreator: React.FC = () => {
   const randomizeSelections = () => {
     const functions: Constraint['function'][] = ['focusing', 'exclusionary'];
     const types: Constraint['type'][] = ['channel', 'anchor'];
-    const flexibilities: Constraint['flexibility'][] = ['fixed', 'flexible'];
+    const flexibilities: Constraint['flexibility'][] = ['fixed','flexible'];
 
     setFunctionType(functions[Math.floor(Math.random() * functions.length)]);
     setConstraintType(types[Math.floor(Math.random() * types.length)]);
@@ -32,46 +46,49 @@ const ConstraintCreator: React.FC = () => {
   };
 
   const generatePlaceholderConstraint = (): Constraint => {
+    // Use custom values if provided, otherwise use defaults
     return {
       id: crypto.randomUUID(),
-      description: 'The story must include a mysterious old map.',
+      description: description || 'The story must include a mysterious old map.',
       function: functionType!,
       type: constraintType!,
       flexibility: flexibility!,
-      reason:
-        'This constraint adds a sense of discovery and connects to the theme of exploration.',
+      reason: reason || 'This constraint adds a sense of discovery and connects to the theme of exploration.',
       examples: {
-        valid: ['The character finds a torn map leading to a hidden cave.'],
-        invalid: ['There is no mention of any map throughout the story.'],
+        valid: [validExample || 'The character finds a torn map leading to a hidden cave.'],
+        invalid: [invalidExample || 'There is no mention of any map throughout the story.'],
       },
     };
   };
 
   const handleGenerateConstraint = () => {
     if (!functionType || !constraintType || !flexibility) return;
-    const selectedOptions = {
-      function: functionType,
-      type: constraintType,
-      flexibility: flexibility,
-    };
-    console.log('Selected Options:', selectedOptions);
     const constraint = generatePlaceholderConstraint();
     setGeneratedConstraint(constraint);
   };
 
   const handleAcceptConstraint = () => {
-    alert('Constraint added successfully!');
-    setGeneratedConstraint(null);
-    setFunctionType(null);
-    setConstraintType(null);
-    setFlexibility(null);
+    if (!generatedConstraint) return;
+    onAddConstraint(generatedConstraint);
+    resetForm();
+    if (onClose) {
+      onClose();
+    }
   };
 
   const handleDiscardConstraint = () => {
+    resetForm();
+  };
+
+  const resetForm = () => {
     setGeneratedConstraint(null);
     setFunctionType(null);
     setConstraintType(null);
     setFlexibility(null);
+    setDescription('');
+    setReason('');
+    setValidExample('');
+    setInvalidExample('');
   };
 
   const handleRegenerateConstraint = () => {
@@ -82,9 +99,16 @@ const ConstraintCreator: React.FC = () => {
   const isGenerateDisabled = !functionType || !constraintType || !flexibility;
 
   const infoDescriptions: Record<string, string> = {
-    function: `Focusing: Specifies what must be included — e.g., a theme, event, or arc.\nExclusionary: Specifies what must NOT happen — e.g., avoiding violence or removing a genre.`,
-    type: `Channel: Broad guidance — e.g., must take place in space or the 1800s.\nAnchor: Specific anchors — e.g., a named object, character, or artifact.`,
-    flexibility: `Fixed: Must be followed without changes.\nFlexible: Open to interpretation and negotiation.`,
+    function: `Focusing: Specifies what must be included — e.g., a theme, event, or arc.
+Exclusionary: Specifies what must NOT happen — e.g., avoiding violence or removing a genre.`,
+    type: `Channel: Broad guidance — e.g., must take place in space or the 1800s.
+Anchor: Specific anchors — e.g., a named object, character, or artifact.`,
+    flexibility: `Fixed: Must be followed without changes.
+Faux-Fixed: Appears fixed but can be altered with proper justification.
+Flexible: Open to interpretation and negotiation.`,
+    description: `The main statement of the constraint - what must be followed or avoided.`,
+    reason: `Why this constraint is important for the story's consistency.`,
+    examples: `Examples help clarify how to follow or not follow the constraint.`
   };
 
   useEffect(() => {
@@ -227,6 +251,123 @@ const ConstraintCreator: React.FC = () => {
               className='absolute top-10 left-0 bg-white border shadow-lg rounded-md p-4 w-80 z-20 text-sm text-gray-700 whitespace-pre-wrap'
             >
               {infoDescriptions.flexibility}
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        <div className='relative'>
+          <div className='flex items-center gap-2 mb-2'>
+            <span className='text-sm font-medium text-gray-700'>
+              Description
+            </span>
+            <button
+              onClick={() =>
+                setInfoPopover(
+                  infoPopover === 'description' ? null : 'description'
+                )
+              }
+            >
+              <Info className='h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer' />
+            </button>
+          </div>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe what must be maintained in the story..."
+            className="w-full min-h-[80px]"
+          />
+          {infoPopover === 'description' && (
+            <div
+              ref={infoRef}
+              className='absolute top-10 left-0 bg-white border shadow-lg rounded-md p-4 w-80 z-20 text-sm text-gray-700 whitespace-pre-wrap'
+            >
+              {infoDescriptions.description}
+            </div>
+          )}
+        </div>
+
+        {/* Reason */}
+        <div className='relative'>
+          <div className='flex items-center gap-2 mb-2'>
+            <span className='text-sm font-medium text-gray-700'>
+              Reason
+            </span>
+            <button
+              onClick={() =>
+                setInfoPopover(
+                  infoPopover === 'reason' ? null : 'reason'
+                )
+              }
+            >
+              <Info className='h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer' />
+            </button>
+          </div>
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Why is this constraint important for the story?"
+            className="w-full min-h-[80px]"
+          />
+          {infoPopover === 'reason' && (
+            <div
+              ref={infoRef}
+              className='absolute top-10 left-0 bg-white border shadow-lg rounded-md p-4 w-80 z-20 text-sm text-gray-700 whitespace-pre-wrap'
+            >
+              {infoDescriptions.reason}
+            </div>
+          )}
+        </div>
+
+        {/* Examples */}
+        <div className='relative'>
+          <div className='flex items-center gap-2 mb-2'>
+            <span className='text-sm font-medium text-gray-700'>
+              Examples
+            </span>
+            <button
+              onClick={() =>
+                setInfoPopover(
+                  infoPopover === 'examples' ? null : 'examples'
+                )
+              }
+            >
+              <Info className='h-4 w-4 text-gray-500 hover:text-gray-700 cursor-pointer' />
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <span className='text-xs font-medium text-green-700 block mb-1'>
+                Valid Example:
+              </span>
+              <Textarea
+                value={validExample}
+                onChange={(e) => setValidExample(e.target.value)}
+                placeholder="An example that follows this constraint..."
+                className="w-full min-h-[60px] border-green-200"
+              />
+            </div>
+            
+            <div>
+              <span className='text-xs font-medium text-red-700 block mb-1'>
+                Invalid Example:
+              </span>
+              <Textarea
+                value={invalidExample}
+                onChange={(e) => setInvalidExample(e.target.value)}
+                placeholder="An example that violates this constraint..."
+                className="w-full min-h-[60px] border-red-200"
+              />
+            </div>
+          </div>
+          
+          {infoPopover === 'examples' && (
+            <div
+              ref={infoRef}
+              className='absolute top-10 left-0 bg-white border shadow-lg rounded-md p-4 w-80 z-20 text-sm text-gray-700 whitespace-pre-wrap'
+            >
+              {infoDescriptions.examples}
             </div>
           )}
         </div>
