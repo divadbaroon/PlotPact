@@ -1,31 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowRight, 
-  BookOpen, 
-  Brain, 
-  Lightbulb, 
-  Users, 
-  Edit, 
-  FilePlus2, 
-  Loader2,
-  CheckCircle,
-  ScrollText
+  ArrowRight,
+  BookOpen,
+  Brain,
+  Lightbulb,
+  Users,
+  Edit,
+  FilePlus2,
 } from 'lucide-react';
 
 import knight from '../../public/story-images/knight.jpg';
@@ -33,29 +20,9 @@ import lila from '../../public/story-images/lila.png';
 
 export default function Home() {
   const router = useRouter();
-  const [customPlotDialogOpen, setCustomPlotDialogOpen] = useState(false);
-  const [customPlot, setCustomPlot] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [storyModeDialogOpen, setStoryModeDialogOpen] = useState(false);
 
   const handleStartEmptyCanvas = () => {
-    setCustomPlotDialogOpen(true);
-  };
-
-  const handleSubmitCustomPlot = async () => {
-    if (!customPlot.trim()) return;
-    
-    setIsSubmitting(true);
-    try {
-      // TODO: create API to create a new story
-      // For now just redirecting to template story
-      router.push('/story/1');
-    } catch (error) {
-      console.error('Error creating custom story:', error);
-    } finally {
-      setIsSubmitting(false);
-      setCustomPlotDialogOpen(false);
-    }
+    router.push(`/story/customStory`);
   };
 
   const handleTemplateStory = (storyId: string) => {
@@ -76,10 +43,14 @@ export default function Home() {
               Interactive Storytelling with Human-AI Constraint Negotiation
             </p>
             <div className='flex flex-col sm:flex-row gap-4 mt-8'>
-              <Button 
-                size='lg' 
+              <Button
+                size='lg'
                 className='gap-2'
-                onClick={() => setStoryModeDialogOpen(true)}
+                onClick={() => {
+                  document.querySelector('#story-type')?.scrollIntoView({
+                    behavior: 'smooth',
+                  });
+                }}
               >
                 Start Writing <ArrowRight className='h-4 w-4' />
               </Button>
@@ -94,8 +65,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Choose Story Type */}
+      <section
+        id='story-type'
+        className='py-16 px-4 sm:px-6 lg:px-8 bg-background'
+      >
+        <div className='text-center mb-12'>
+          <h2 className='text-3xl font-bold mb-4'>Story Mode</h2>
+          <p className='text-xl text-muted-foreground max-w-3xl mx-auto'>
+            Select how you want to start your story
+          </p>
+        </div>
+
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 py-4'>
+          <Card
+            className='cursor-pointer hover:border-primary transition-colors'
+            onClick={handleStartEmptyCanvas}
+          >
+            <CardContent className='p-6 flex flex-col items-center text-center'>
+              <Edit className='h-12 w-12 text-primary mb-4' />
+              <h3 className='text-lg font-medium mb-2'>Start Empty Canvas</h3>
+              <p className='text-sm text-muted-foreground'>
+                Create your own story plot and write from scratch
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card
+            className='cursor-pointer hover:border-primary transition-colors'
+            onClick={() => {
+              document.querySelector('#featured-stories')?.scrollIntoView({
+                behavior: 'smooth',
+              });
+            }}
+          >
+            <CardContent className='p-6 flex flex-col items-center text-center'>
+              <FilePlus2 className='h-12 w-12 text-primary mb-4' />
+              <h3 className='text-lg font-medium mb-2'>Use Template</h3>
+              <p className='text-sm text-muted-foreground'>
+                Continue a story from our featured templates
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Featured Stories Section */}
-      <section id="featured-stories" className='py-16 px-4 sm:px-6 lg:px-8 bg-background'>
+      <section
+        id='featured-stories'
+        className='py-16 px-4 sm:px-6 lg:px-8 bg-background'
+      >
         <div className='container mx-auto max-w-6xl'>
           <div className='text-center mb-12'>
             <h2 className='text-3xl font-bold mb-4'>Featured Stories</h2>
@@ -106,7 +125,7 @@ export default function Home() {
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
             {/* Lila Story */}
-            <div 
+            <div
               className='group cursor-pointer'
               onClick={() => handleTemplateStory('1')}
             >
@@ -144,7 +163,7 @@ export default function Home() {
             </div>
 
             {/* Knight story */}
-            <div 
+            <div
               className='group cursor-pointer'
               onClick={() => handleTemplateStory('0')}
             >
@@ -163,7 +182,7 @@ export default function Home() {
                     A Knight&apos;s Stand
                   </h3>
                   <p className='text-muted-foreground'>
-                  When the ancient dragon Malgrath descends upon the peaceful
+                    When the ancient dragon Malgrath descends upon the peaceful
                     village of Oakendale, retired knight Sir Brannen takes up
                     his rusted armor for one final battle to protect his home.
                     Experience the journey of a broken hero who must rediscover
@@ -367,121 +386,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Story Mode Selection Dialog */}
-      <Dialog open={storyModeDialogOpen} onOpenChange={setStoryModeDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Choose Your Story Mode</DialogTitle>
-            <DialogDescription>
-              Select how you want to start your story
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-            <Card 
-              className="cursor-pointer hover:border-primary transition-colors" 
-              onClick={handleStartEmptyCanvas}
-            >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <Edit className="h-12 w-12 text-primary mb-4" />
-                <h3 className="text-lg font-medium mb-2">Start Empty Canvas</h3>
-                <p className="text-sm text-muted-foreground">
-                  Create your own story plot and write from scratch
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card 
-              className="cursor-pointer hover:border-primary transition-colors"
-              onClick={() => {
-                setStoryModeDialogOpen(false);
-                document.querySelector('#featured-stories')?.scrollIntoView({ 
-                  behavior: 'smooth' 
-                });
-              }}
-            >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <FilePlus2 className="h-12 w-12 text-primary mb-4" />
-                <h3 className="text-lg font-medium mb-2">Use Template</h3>
-                <p className="text-sm text-muted-foreground">
-                  Continue a story from our featured templates
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setStoryModeDialogOpen(false)}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Custom Plot Dialog */}
-      <Dialog 
-        open={customPlotDialogOpen} 
-        onOpenChange={(open) => {
-          // Only allow closing if not submitting
-          if (!isSubmitting) {
-            setCustomPlotDialogOpen(open);
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Create Your Story Plot</DialogTitle>
-            <DialogDescription>
-              Describe the setting, main characters, and central conflict of your story.
-              This will be used to generate initial constraints.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ScrollText className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-medium">Story Plot</h3>
-            </div>
-            <Textarea
-              value={customPlot}
-              onChange={(e) => setCustomPlot(e.target.value)}
-              placeholder="Describe your story plot here..."
-              className="min-h-[150px] mb-2"
-            />
-            <p className="text-xs text-muted-foreground">
-              Minimum 50 characters. More detailed plots will generate better constraints.
-            </p>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setCustomPlotDialogOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSubmitCustomPlot}
-              disabled={isSubmitting || customPlot.length < 50}
-              className="gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  Create Story
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

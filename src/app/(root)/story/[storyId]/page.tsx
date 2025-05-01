@@ -9,17 +9,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  AlertCircle,
   CheckCircle2,
   BookOpen,
-  ScrollText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { startChatStory } from '@/lib/actions/startChatGPT';
 import { sendAnswer } from '@/lib/actions/sendAnswerGPT';
-import { verifyContent } from '@/lib/actions/constraintManager';
+import {
+  verifyContent,
+  generateInitialPlotConstraints,
+} from '@/lib/actions/constraintManager';
+
+import { startTemplateStory } from '@/lib/actions/startTemplateStory';
 
 import type {
   StoryResponse,
@@ -33,6 +35,9 @@ import lila from '../../../../../public/story-images/lila.png';
 
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 import ConstraintCreator from '@/components/chat/ConstraintCreator';
+import CreateCustomPlot from '@/components/chat/CreatePlot';
+import StoryPlotDisplay from '@/components/chat/StoryPlotDisplay';
+import ViolationsDisplay from '@/components/chat/ViolationsDisplay';
 
 const ChatInterface: React.FC = () => {
   const params = useParams();
@@ -41,11 +46,24 @@ const ChatInterface: React.FC = () => {
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
   const editableRef = useRef<HTMLDivElement | null>(null);
 
-  const [panelOpen, setPanelOpen] = useState<boolean>(false);
-  const [createConstraintPanelOpen, setCreateConstraintPanelOpen] = useState<boolean>(false);
+  // const [isCustomStory, setIsCustomStory] = useState<boolean>(false);
+
+  const [customPlotDialogOpen, setCustomPlotDialogOpen] =
+    useState<boolean>(false);
+
+  const [viewConstraintsPanelOpen, setViewConstraintsPanelOpen] =
+    useState<boolean>(false);
+  const [createConstraintPanelOpen, setCreateConstraintPanelOpen] =
+    useState<boolean>(false);
+
   const [chatId, setChatId] = useState<string | null>(null);
+
   const [plot, setPlot] = useState<string>('');
+
+  const [storyTitle, setStoryTitle] = useState<string>('');
+
   const [eos, setEos] = useState<boolean>(false);
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const [paras, setParas] = useState<string[]>([]);
@@ -58,25 +76,36 @@ const ChatInterface: React.FC = () => {
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all');
-  
+  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>(
+    'all'
+  );
+
   const [constraintFilter, setConstraintFilter] = useState<string>('all');
 
-  let storyDetails = {
-    storyImg: knight,
-    storyTitle: `A Knight's Stand`,
-  };
+  const [isSubmittingPlot, setIsSubmittingPlot] = useState<boolean>(false);
 
-  if (storyId == '1') {
-    storyDetails = {
-      storyImg: lila,
-      storyTitle: 'The Box with the Brass Dial',
-    };
-  } else
-    storyDetails = {
-      storyImg: knight,
-      storyTitle: `A Knight's Stand`,
-    };
+  // let storyDetails = {
+  //   storyImg: knight,
+  //   storyTitle: `A Knight's Stand`,
+  // };
+
+  // if (storyId == '1') {
+  //   storyDetails = {
+  //     storyImg: lila,
+  //     storyTitle: 'The Box with the Brass Dial',
+  //   };
+  // } else
+  //   storyDetails = {
+  //     storyImg: knight,
+  //     storyTitle: `A Knight's Stand`,
+  //   };
+
+  // Used to monitor constraints changes
+  useEffect(() => {
+    if (storyId == 'customStory') {
+      setCustomPlotDialogOpen(true);
+    }
+  }, [storyId]);
 
   // Used to monitor constraints changes
   useEffect(() => {
@@ -114,70 +143,125 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     const initChat = async () => {
       try {
+        // setLoading(true);
+
+        // const data = (await startChatStory(storyId)) as StoryResponse;
+
+        // setChatId(data.chatId);
+
+        // if (data.para) {
+        //   streamText(data.para);
+        //   setLoading(false);
+        // } else {
+        //   setLoading(false);
+        // }
+
+        // if (data.plot) {
+        //   setPlot(data.plot);
+        // }
+
+        // if (data.title) {
+        //   setStoryTitle(data.title);
+        // }
+
+        // // Set initial constraints if any
+        // if (data.constraints) {
+        //   setConstraints(data.constraints);
+        // }
+
+        // setEos(!!data.eos);
+
         setLoading(true);
-    
-        const data = (await startChatStory(storyId)) as StoryResponse;
-        setChatId(data.chatId);
-    
-        if (data.para) {
-          streamText(data.para);
-          setLoading(false);
-        } else {
-          setLoading(false);
+
+        const data = startTemplateStory(storyId);
+
+        if (data.title) {
+          setStoryTitle(data.title);
         }
-    
+
         if (data.plot) {
           setPlot(data.plot);
+
+          const plotConstraints = await generateInitialPlotConstraints(
+            data.plot
+          );
+
+          setConstraints(plotConstraints);
+          setNewConstraints(plotConstraints);
+          setActiveTab('new');
+          setCreateConstraintPanelOpen(false);
+          setViewConstraintsPanelOpen(true);
         }
-        
-        // Set initial constraints if any
-        if (data.constraints) {
-          setConstraints(data.constraints);
-        }
-        
-        setEos(!!data.eos);
+
+        setLoading(false);
       } catch (error) {
         console.error('Error initializing chat:', error);
         setLoading(false);
       }
     };
 
-    initChat();
-  }, [storyId]);
+    if (storyId != 'customStory') initChat();
 
-  // Handle "continue" button with original functionality
-  const handleContinue = async () => {
-    if (!chatId || eos) return;
-  
+    //Do not include dependencies, this only needs to run once at the start of the app
+  }, []);
+
+  const handleSubmitPlot = async () => {
+    setIsSubmittingPlot(true);
+
+    if (!plot.trim()) return;
+
     try {
-      setLoading(true);
-      
-      // Use "continue the story" as the input for the sendAnswer function
-      const data = await sendAnswer(chatId, 'continue the story');
-  
-      if (data.para) {
-        streamText(data.para);
-        
-        // Reset loading once streaming starts
-        setLoading(false);
-      } else {
-        setLoading(false);
-      }
-      
-      setEos(!!data.eos);
+      const plotConstraints = await generateInitialPlotConstraints(plot);
+
+      setConstraints(plotConstraints);
+      setNewConstraints(plotConstraints);
+      setActiveTab('new');
+      setCreateConstraintPanelOpen(false);
+      setViewConstraintsPanelOpen(true);
     } catch (error) {
-      console.error('Error continuing story:', error);
-      setLoading(false);
+      console.error('Error creating custom story:', error);
+    } finally {
+      setIsSubmittingPlot(false);
+      setCustomPlotDialogOpen(false);
     }
   };
 
+  // // Handle "continue" button with original functionality
+  // const handleContinue = async () => {
+  //   if (!chatId || eos) return;
+
+  //   try {
+  //     setLoading(true);
+
+  //     // Use "continue the story" as the input for the sendAnswer function
+  //     const data = await sendAnswer(chatId, 'continue the story');
+
+  //     if (data.para) {
+  //       streamText(data.para);
+
+  //       // Reset loading once streaming starts
+  //       setLoading(false);
+  //     } else {
+  //       setLoading(false);
+  //     }
+
+  //     setEos(!!data.eos);
+  //   } catch (error) {
+  //     console.error('Error continuing story:', error);
+  //     setLoading(false);
+  //   }
+  // };
+
   // Handle user input
   const handleSubmit = async () => {
-    if (!chatId || eos || !editableRef.current) return;
-    
+    // if (!chatId || eos || !editableRef.current) return;
+
+    if (!editableRef.current) return;
+
     const userContent = editableRef.current.innerText.trim();
+
     if (!userContent) return;
-  
+
     try {
       console.log('Verifying content against constraints:', constraints);
       // Verify the content against existing constraints
@@ -187,10 +271,10 @@ const ChatInterface: React.FC = () => {
         constraints
       );
       console.log('Verification result:', verificationResult);
-  
+
       if (!verificationResult.isValid) {
         setViolations(verificationResult.violations);
-  
+
         setViolationsList((prev) => [
           ...prev,
           {
@@ -198,17 +282,17 @@ const ChatInterface: React.FC = () => {
             sentContent: userContent,
           },
         ]);
-  
+
         return;
       }
-  
+
       setLoading(true);
       setViolations([]);
-  
+
       // Add the content directly to the story
       streamText(userContent);
       setLoading(false);
-      
+
       // Clear the editable div
       if (editableRef.current) {
         editableRef.current.innerText = '';
@@ -219,93 +303,24 @@ const ChatInterface: React.FC = () => {
     }
   };
 
-  const togglePanel = (): void => {
+  const toggleViewConstraints = (): void => {
     setCreateConstraintPanelOpen(false);
-    setPanelOpen(!panelOpen);
+    setViewConstraintsPanelOpen(!viewConstraintsPanelOpen);
   };
 
   const toggleAddConstraint = (): void => {
-    setPanelOpen(false);
+    setViewConstraintsPanelOpen(false);
     setCreateConstraintPanelOpen(!createConstraintPanelOpen);
   };
-  
+
   const handleAddConstraint = (newConstraint: Constraint): void => {
     setConstraints((prev) => [...prev, newConstraint]);
     setNewConstraints([newConstraint]);
     setActiveTab('new');
     setCreateConstraintPanelOpen(false);
-    setPanelOpen(true);
+    setViewConstraintsPanelOpen(true);
   };
 
-  // Show user why their input was not accepted
-  const ViolationsDisplay = () =>
-    violations.length > 0 && (
-      <Card className='bg-red-100 border-2 border-red-300 mb-6 animate-in fade-in duration-300 shadow-md hover:shadow-lg hover:border-red-400 transition-all cursor-help'>
-        <CardContent className='pt-6'>
-          <div className='flex items-center gap-2 mb-4 text-red-800'>
-            <AlertCircle className='h-6 w-6 text-red-600' />
-            <h3 className='text-lg font-bold'>Story Inconsistencies Found</h3>
-          </div>
-          <div className='space-y-3'>
-            {violations.map((violation: Violation, index: number) => (
-              <div
-                key={index}
-                className='border-l-4 border-red-500 pl-4 py-2 bg-white rounded-md shadow-sm hover:shadow-md hover:bg-red-50 transition-all duration-200'
-              >
-                <p className='text-red-700 font-semibold text-sm mb-1'>
-                  {violation.constraintType}
-                </p>
-                <p className='text-gray-800 text-sm'>{violation.explanation}</p>
-              </div>
-            ))}
-          </div>
-          <div className='flex items-center gap-2 mt-5 p-3 bg-red-50 border border-red-200 rounded-md'>
-            <AlertCircle className='h-5 w-5 text-red-500 flex-shrink-0' />
-            <p className='text-sm text-gray-700'>
-              Please revise your input to maintain story consistency.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-
-  // Story Plot Display
-  // Using hardcoded story plot for now
-
-  const StoryPlotDisplay = () => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    
-    return (
-      <div className="relative mt-4 mb-4"> 
-        <div className="flex justify-end mb-2"> 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="hover:bg-gray-100 transition-colors"
-          >
-            {isExpanded ? 'Hide Plot' : 'Show Plot'}
-          </Button>
-        </div>
-        
-        <div className={`overflow-hidden transition-all duration-300 ${
-          isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-        }`}>
-          <Card className="bg-gray-50 border border-gray-200">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-3">
-                <ScrollText className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-800">Story Plot</h2>
-              </div>
-              <p className="text-gray-700 bg-white p-4 rounded-md border border-gray-200 italic">
-                Lila discovers a mysterious wooden box on her doorstep, adorned with a brass dial and an ominous note: 'Turn the dial to the right number to save him.' With no clue who 'him' refers to—her brother, her father, or someone else—panic grips her. As she turns the box over, faint numbers etched along its edges hint at a hidden code. Racing against an unknown clock, she must decipher the message before it's too late. The story unfolds as a tense puzzle, blending suspense and urgency, where every second counts and the right number holds the key to salvation.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  };
   return (
     <div className='flex h-screen bg-gray-50'>
       <div className='flex-1 flex flex-col border-r border-gray-200 bg-white'>
@@ -321,27 +336,25 @@ const ChatInterface: React.FC = () => {
 
           {/* Right side controls with hover effect */}
           <div className='flex items-center gap-2'>
-            <Button
-              onClick={toggleAddConstraint}
-            >
-              Add Constraint
-            </Button>
+            <Button onClick={toggleAddConstraint}>Add Constraint</Button>
             <Button
               variant={violationsList.length > 0 ? 'destructive' : 'outline'}
               size='sm'
               className={`text-sm flex items-center gap-1 cursor-pointer ${
-                violationsList.length > 0 && !panelOpen ? 'animate-pulse' : ''
+                violationsList.length > 0 && !viewConstraintsPanelOpen
+                  ? 'animate-pulse'
+                  : ''
               } hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 ${'hover:bg-gray-100'}`}
-              onClick={togglePanel}
+              onClick={toggleViewConstraints}
             >
               <div className='flex items-center'>
-                {violationsList.length > 0 && !panelOpen && (
+                {violationsList.length > 0 && !viewConstraintsPanelOpen && (
                   <Badge variant='destructive' className='mr-2 text-white'>
                     {violationsList.length}
                   </Badge>
                 )}
                 <span className='mr-1'>View Constraints</span>
-                {panelOpen ? (
+                {viewConstraintsPanelOpen ? (
                   <ChevronRight className='h-4 w-4' />
                 ) : (
                   <ChevronLeft className='h-4 w-4' />
@@ -354,19 +367,30 @@ const ChatInterface: React.FC = () => {
         <div className='flex-1 overflow-y-auto p-4 md:p-6 lg:p-8'>
           <div className='max-w-3xl mx-auto'>
             <h1 className='text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800'>
-              {storyDetails.storyTitle}
+              {storyTitle}
             </h1>
 
-            <div className='aspect-video overflow-hidden rounded-lg shadow-md mb-8 mx-auto hover:shadow-lg transition-all duration-300 relative h-64 w-full'>
+            {/* <div className='aspect-video overflow-hidden rounded-lg shadow-md mb-8 mx-auto hover:shadow-lg transition-all duration-300 relative h-64 w-full'>
               <Image
                 src={storyDetails.storyImg}
                 alt='Story Image'
                 fill
                 className='object-cover w-full h-full'
               />
-            </div>
+            </div> */}
 
-            <StoryPlotDisplay />
+            <CreateCustomPlot
+              title={storyTitle}
+              plot={plot}
+              setPlot={setPlot}
+              setTitle={setStoryTitle}
+              open={customPlotDialogOpen}
+              setOpen={setCustomPlotDialogOpen}
+              isSubmitting={isSubmittingPlot}
+              onSubmit={handleSubmitPlot}
+            />
+
+            <StoryPlotDisplay plot={plot} />
 
             <div className='prose max-w-none'>
               {paras.map((text, idx) => (
@@ -388,7 +412,7 @@ const ChatInterface: React.FC = () => {
               </div>
             )}
 
-            {!eos && !isStreaming && !loading && paras[0] && (
+            {!isStreaming && !loading && (
               <div className='mt-8 space-y-6'>
                 {/* Editable div for direct typing */}
                 <div
@@ -397,7 +421,7 @@ const ChatInterface: React.FC = () => {
                   className='min-h-[150px] p-4 border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors bg-white w-full outline-none'
                   style={{ outline: 'none' }}
                 ></div>
-                
+
                 <div className='flex gap-3 justify-end'>
                   <Button
                     onClick={handleSubmit}
@@ -405,28 +429,28 @@ const ChatInterface: React.FC = () => {
                   >
                     Submit
                   </Button>
-                  
-                  <Button
+
+                  {/* <Button
                     onClick={handleContinue}
-                    variant="secondary"
+                    variant='secondary'
                     className='hover:bg-gray-200 transition-colors duration-200 hover:shadow-md transform hover:-translate-y-0.5 cursor-pointer'
                   >
                     Continue
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             )}
 
-            {!loading && <ViolationsDisplay />}
+            {!loading && <ViolationsDisplay violations={violations} />}
 
-            {eos && (
+            {/* {eos && (
               <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 hover:shadow-md transition-all duration-200 hover:border-green-300'>
                 <CheckCircle2 className='h-6 w-6 text-green-600' />
                 <p className='text-gray-900 font-medium'>
                   Story completed successfully!
                 </p>
               </div>
-            )}
+            )} */}
 
             <div ref={scrollAnchorRef} className='h-2' />
           </div>
@@ -436,7 +460,7 @@ const ChatInterface: React.FC = () => {
       {/* side panel */}
       <div
         className={`${
-          panelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
+          viewConstraintsPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
       >
         <div className='p-4 h-full flex flex-col'>
@@ -482,7 +506,7 @@ const ChatInterface: React.FC = () => {
       >
         <div className='p-4 h-full flex flex-col'>
           <div className='flex-1 overflow-hidden'>
-            <ConstraintCreator 
+            <ConstraintCreator
               onAddConstraint={handleAddConstraint}
               onClose={() => setCreateConstraintPanelOpen(false)}
             />

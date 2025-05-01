@@ -17,6 +17,12 @@ export interface Constraint {
   };
 }
 
+export interface ConstraintStructure {
+  function: ConstraintFunction;
+  type: ConstraintType;
+  flexibility: ConstraintFlexibility;
+}
+
 export interface Violation {
   constraintType: string;
   explanation: string;
@@ -35,6 +41,7 @@ export interface StoryResponse {
   eos?: string | boolean;
   constraints?: Constraint[];
   plot?: string;
+  title?: string;
 }
 
 export type MessageSender = 'user' | 'ai';
