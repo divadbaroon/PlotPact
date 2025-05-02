@@ -36,7 +36,7 @@ const CreateCustomPlot: React.FC<CreateCustomPlotProps> = ({
   onSubmit,
 }) => {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open}>
       <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>Create Your Story</DialogTitle>
@@ -57,7 +57,7 @@ const CreateCustomPlot: React.FC<CreateCustomPlotProps> = ({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder='Give you story a title'
+              placeholder='Give your story a title'
               className='mb-1'
             />
             <p className='text-xs text-muted-foreground'>

@@ -46,7 +46,9 @@ const ChatInterface: React.FC = () => {
   const storyId = params.storyId as string;
 
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
-  const editableRef = useRef<HTMLDivElement | null>(null);
+  // const editableRef = useRef<HTMLDivElement | null>(null);
+
+  const editableRef = useRef<HTMLTextAreaElement | null>(null);
 
   // const [isCustomStory, setIsCustomStory] = useState<boolean>(false);
 
@@ -116,7 +118,6 @@ const ChatInterface: React.FC = () => {
         clearInterval(interval);
         setParas((prev) => [...prev, text]);
 
-        console.log(paras);
         setStreamingPara('');
         setIsStreaming(false);
       }
@@ -219,7 +220,9 @@ const ChatInterface: React.FC = () => {
 
     if (!editableRef.current) return;
 
-    const userContent = editableRef.current.innerText.trim();
+    const userContent = editableRef.current.value.trim();
+
+    console.log(userContent);
 
     if (!userContent) return;
 
@@ -385,12 +388,18 @@ const ChatInterface: React.FC = () => {
             {!isStreaming && !loading && (
               <div className='mt-8 space-y-6'>
                 {/* Editable div for direct typing */}
-                <div
+                {/* <div
                   ref={editableRef}
                   contentEditable
                   className='min-h-[150px] p-4 border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors bg-white w-full outline-none'
                   style={{ outline: 'none' }}
-                ></div>
+                ></div> */}
+                <textarea
+                  ref={editableRef}
+                  className='min-h-[150px] p-4 border border-gray-300 rounded-md focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-colors bg-white w-full outline-none resize-none w-full'
+                  placeholder='Write your story...'
+                  rows={6}
+                />
 
                 <div className='flex gap-3 justify-end'>
                   <Button
