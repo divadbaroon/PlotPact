@@ -88,7 +88,8 @@ export async function generateInitialPlotConstraints(storyPlot: string) {
 export async function createConstraint(
   storyContext: string[],
   existingConstraints: Constraint[],
-  constraintStructure: ConstraintStructure[]
+  constraintStructure: ConstraintStructure,
+  constraintCount: number | 1
 ) {
   try {
     console.log(
@@ -103,7 +104,7 @@ export async function createConstraint(
       messages: [
         {
           role: 'system',
-          content: `You are a narrative constraint generator that creates a structured constraint to enhance user creativity while keeping them broad and lenient. The constraint should have following structure:
+          content: `You are a narrative constraint generator that creates a structured constraints to enhance user creativity while keeping them broad and lenient. The constraints should have following structure:
           
           - Function: 'exclusionary' (Don't do X) or 'focusing' (Do Y)
           - Type: 'channel' (broad themes/setting) or 'anchor' (specific elements)
@@ -154,6 +155,7 @@ export async function createConstraint(
             null,
             2
           )};
+          Number of Constraints to be generated: ${constraintCount}
           `,
         },
       ],

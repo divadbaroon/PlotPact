@@ -18,9 +18,9 @@ export interface Constraint {
 }
 
 export interface ConstraintStructure {
-  function: ConstraintFunction;
-  type: ConstraintType;
-  flexibility: ConstraintFlexibility;
+  function: ConstraintFunction | null;
+  type: ConstraintType | null;
+  flexibility: ConstraintFlexibility | null;
 }
 
 export interface Violation {

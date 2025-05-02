@@ -3,19 +3,21 @@
 import type React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
 import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  CheckCircle2,
+  // CheckCircle2,
   BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { startChatStory } from '@/lib/actions/startChatGPT';
-import { sendAnswer } from '@/lib/actions/sendAnswerGPT';
+
+// import { startChatStory } from '@/lib/actions/startChatGPT';
+// import { sendAnswer } from '@/lib/actions/sendAnswerGPT';
+
 import {
   verifyContent,
   generateInitialPlotConstraints,
@@ -24,14 +26,14 @@ import {
 import { startTemplateStory } from '@/lib/actions/startTemplateStory';
 
 import type {
-  StoryResponse,
+  // StoryResponse,
   Constraint,
   Violation,
   ViolationState,
 } from '@/types';
 
-import knight from '../../../../../public/story-images/knight.jpg';
-import lila from '../../../../../public/story-images/lila.png';
+// import knight from '../../../../../public/story-images/knight.jpg';
+// import lila from '../../../../../public/story-images/lila.png';
 
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 import ConstraintCreator from '@/components/chat/ConstraintCreator';
@@ -56,13 +58,13 @@ const ChatInterface: React.FC = () => {
   const [createConstraintPanelOpen, setCreateConstraintPanelOpen] =
     useState<boolean>(false);
 
-  const [chatId, setChatId] = useState<string | null>(null);
+  // const [chatId, setChatId] = useState<string | null>(null);
 
   const [plot, setPlot] = useState<string>('');
 
   const [storyTitle, setStoryTitle] = useState<string>('');
 
-  const [eos, setEos] = useState<boolean>(false);
+  // const [eos, setEos] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -84,23 +86,7 @@ const ChatInterface: React.FC = () => {
 
   const [isSubmittingPlot, setIsSubmittingPlot] = useState<boolean>(false);
 
-  // let storyDetails = {
-  //   storyImg: knight,
-  //   storyTitle: `A Knight's Stand`,
-  // };
-
-  // if (storyId == '1') {
-  //   storyDetails = {
-  //     storyImg: lila,
-  //     storyTitle: 'The Box with the Brass Dial',
-  //   };
-  // } else
-  //   storyDetails = {
-  //     storyImg: knight,
-  //     storyTitle: `A Knight's Stand`,
-  //   };
-
-  // Used to monitor constraints changes
+  // open plot dialogue if custom story
   useEffect(() => {
     if (storyId == 'customStory') {
       setCustomPlotDialogOpen(true);
@@ -129,6 +115,8 @@ const ChatInterface: React.FC = () => {
       } else {
         clearInterval(interval);
         setParas((prev) => [...prev, text]);
+
+        console.log(paras);
         setStreamingPara('');
         setIsStreaming(false);
       }
@@ -143,34 +131,6 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     const initChat = async () => {
       try {
-        // setLoading(true);
-
-        // const data = (await startChatStory(storyId)) as StoryResponse;
-
-        // setChatId(data.chatId);
-
-        // if (data.para) {
-        //   streamText(data.para);
-        //   setLoading(false);
-        // } else {
-        //   setLoading(false);
-        // }
-
-        // if (data.plot) {
-        //   setPlot(data.plot);
-        // }
-
-        // if (data.title) {
-        //   setStoryTitle(data.title);
-        // }
-
-        // // Set initial constraints if any
-        // if (data.constraints) {
-        //   setConstraints(data.constraints);
-        // }
-
-        // setEos(!!data.eos);
-
         setLoading(true);
 
         const data = startTemplateStory(storyId);
@@ -205,6 +165,7 @@ const ChatInterface: React.FC = () => {
     //Do not include dependencies, this only needs to run once at the start of the app
   }, []);
 
+  // for starting the app with custom plot creation
   const handleSubmitPlot = async () => {
     setIsSubmittingPlot(true);
 
@@ -313,9 +274,9 @@ const ChatInterface: React.FC = () => {
     setCreateConstraintPanelOpen(!createConstraintPanelOpen);
   };
 
-  const handleAddConstraint = (newConstraint: Constraint): void => {
-    setConstraints((prev) => [...prev, newConstraint]);
-    setNewConstraints([newConstraint]);
+  const handleAddConstraint = (newConstraints: Constraint[]): void => {
+    setConstraints((prev) => [...prev, ...newConstraints]);
+    setNewConstraints(newConstraints);
     setActiveTab('new');
     setCreateConstraintPanelOpen(false);
     setViewConstraintsPanelOpen(true);
@@ -406,7 +367,16 @@ const ChatInterface: React.FC = () => {
               )}
             </div>
 
-            {loading && !isStreaming && (
+            {loading && !isStreaming && constraints.length == 0 && (
+              <div className='flex justify-center my-6'>
+                <div className='flex flex-col items-center justify-center'>
+                  <Loader2 className='h-10 w-10 text-gray-500 animate-spin' />
+                  <p>Setting up your story and generating constraints</p>
+                </div>
+              </div>
+            )}
+
+            {loading && !isStreaming && constraints.length != 0 && (
               <div className='flex justify-center my-6'>
                 <Loader2 className='h-10 w-10 text-gray-500 animate-spin' />
               </div>
@@ -509,6 +479,8 @@ const ChatInterface: React.FC = () => {
             <ConstraintCreator
               onAddConstraint={handleAddConstraint}
               onClose={() => setCreateConstraintPanelOpen(false)}
+              storyContext={paras}
+              existingConstraints={constraints}
             />
           </div>
         </div>
