@@ -31,7 +31,7 @@ const CreateCustomPlot: React.FC<CreateCustomPlotProps> = ({
   plot,
   setPlot,
   open,
-  setOpen,
+  // setOpen,
   isSubmitting,
   onSubmit,
 }) => {
