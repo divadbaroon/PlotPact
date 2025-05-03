@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, CheckCircle2, AlertCircle, Filter, Plus } from 'lucide-react';
+import { BookOpen, CheckCircle2, AlertCircle, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { Constraint, ViolationState, ConstraintsPanelProps} from '@/types';
 import ConstraintCard from './ConstraintCard';
