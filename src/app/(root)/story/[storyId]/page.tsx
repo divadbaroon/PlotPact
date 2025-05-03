@@ -82,6 +82,8 @@ const ChatInterface: React.FC = () => {
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
 
+  const [violationsViewed, setViolationsViewed] = useState(false);
+
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>(
     'all'
   );
@@ -237,6 +239,9 @@ const ChatInterface: React.FC = () => {
           },
         ]);
 
+        // Set violations as unviewed when new ones occur
+        setViolationsViewed(false);
+
         return;
       }
 
@@ -303,17 +308,18 @@ const ChatInterface: React.FC = () => {
           <div className='flex items-center gap-2'>
             <Button onClick={toggleAddConstraint}>Add Constraint</Button>
             <Button
-              variant={violationsList.length > 0 ? 'destructive' : 'outline'}
+              variant={violationsList.length > 0 && !violationsViewed ? 'destructive' : 'outline'}
               size='sm'
-              className={`text-sm flex items-center gap-1 cursor-pointer ${
-                violationsList.length > 0 && !viewConstraintsPanelOpen
-                  ? 'animate-pulse'
-                  : ''
-              } hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 ${'hover:bg-gray-100'}`}
-              onClick={toggleViewConstraints}
+              className="text-sm flex items-center gap-1 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-100"
+              onClick={() => {
+                toggleViewConstraints();
+                if (activeTab === 'violations') {
+                  setViolationsViewed(true);
+                }
+              }}
             >
               <div className='flex items-center'>
-                {violationsList.length > 0 && !viewConstraintsPanelOpen && (
+                {violationsList.length > 0 && !violationsViewed && (
                   <Badge variant='destructive' className='mr-2 text-white'>
                     {violationsList.length}
                   </Badge>
@@ -451,9 +457,16 @@ const ChatInterface: React.FC = () => {
             violationsList={violationsList}
             constraintFilter={constraintFilter}
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={(tab) => {
+              setActiveTab(tab);
+              // Mark violations as viewed when that tab is selected
+              if (tab === 'violations') {
+                setViolationsViewed(true);
+              }
+            }}
             setConstraintFilter={setConstraintFilter}
-            onDeleteConstraint={handleDeleteConstraint} 
+            onDeleteConstraint={handleDeleteConstraint}
+            violationsViewed={violationsViewed}
           />
           </div>
 
