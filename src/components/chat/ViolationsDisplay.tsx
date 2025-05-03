@@ -11,8 +11,8 @@ const ViolationsDisplay: React.FC<ViolationsDisplayProps> = ({ violations }) => 
   if (violations.length === 0) return null;
 
   return (
-    <Card className='bg-red-100 border-2 border-red-300 mb-6 animate-in fade-in duration-300 shadow-md hover:shadow-lg hover:border-red-400 transition-all cursor-help'>
-      <CardContent className='pt-6'>
+    <Card className='bg-red-100 border-2 border-red-300 mb-6 animate-in fade-in duration-300 shadow-md hover:shadow-lg hover:border-red-400 transition-all mt-5'>
+      <CardContent className='pt-6 -mt-6'>
         <div className='flex items-center gap-2 mb-4 text-red-800'>
           <AlertCircle className='h-6 w-6 text-red-600' />
           <h3 className='text-lg font-bold'>Story Inconsistencies Found</h3>
