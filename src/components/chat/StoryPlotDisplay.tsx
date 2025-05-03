@@ -29,7 +29,7 @@ const StoryPlotDisplay: React.FC<StoryPlotDisplayProps> = ({ plot }) => {
         }`}
       >
         <Card className='bg-gray-50 border border-gray-200'>
-          <CardContent className='pt-6'>
+          <CardContent className='pt-6 -mt-6'>
             <div className='flex items-center gap-2 mb-3'>
               <ScrollText className='h-5 w-5 text-indigo-600' />
               <h2 className='text-lg font-semibold text-gray-800'>
