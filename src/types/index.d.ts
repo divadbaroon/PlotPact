@@ -86,6 +86,7 @@ export interface ConstraintsPanelProps {
   setActiveTab: (tab: 'all' | 'new' | 'violations') => void;
   setConstraintFilter: (filter: string) => void;
   onDeleteConstraint?: (constraint: Constraint) => void;
+  violationsViewed?: boolean;
 }
 
 export interface ConstraintCardProps {
