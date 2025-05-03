@@ -52,6 +52,8 @@ const ChatInterface: React.FC = () => {
 
   // const [isCustomStory, setIsCustomStory] = useState<boolean>(false);
 
+  const hasInit = useRef(false);
+
   const [customPlotDialogOpen, setCustomPlotDialogOpen] =
     useState<boolean>(false);
 
@@ -130,39 +132,28 @@ const ChatInterface: React.FC = () => {
 
   // Initialize chat
   useEffect(() => {
+    // Only initialize once
+    if (hasInit.current) return;
+    hasInit.current = true;
+
     const initChat = async () => {
       try {
         setLoading(true);
 
         const data = startTemplateStory(storyId);
-
-        if (data.title) {
-          setStoryTitle(data.title);
-        }
+        setStoryTitle(data.title ?? '');
+        setPlot(data.plot ?? '');
 
         if (data.plot) {
-          setPlot(data.plot);
-
-          const plotConstraints = await generateInitialPlotConstraints(
-            data.plot
-          );
-
-          setConstraints(plotConstraints);
-          setNewConstraints(plotConstraints);
-          setActiveTab('new');
-          setCreateConstraintPanelOpen(false);
-          setViewConstraintsPanelOpen(true);
+          const initialConstriants = await generateInitialPlotConstraints(data.plot);
+          setConstraints(initialConstriants);
         }
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error initializing chat:', error);
+      } finally {
         setLoading(false);
       }
     };
 
-    if (storyId != 'customStory') initChat();
-
+    if (storyId !== 'customStory') initChat();
   }, [storyId]);
 
   // for starting the app with custom plot creation
