@@ -163,8 +163,7 @@ const ChatInterface: React.FC = () => {
 
     if (storyId != 'customStory') initChat();
 
-    //Do not include dependencies, this only needs to run once at the start of the app
-  }, []);
+  }, [storyId]);
 
   // for starting the app with custom plot creation
   const handleSubmitPlot = async () => {
