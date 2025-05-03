@@ -185,14 +185,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
                 </div>
               </div>
               
-              {/* Add Plus Icon Button as the last item in the filters row */}
-              <button 
-                className="ml-1 p-1 rounded-full hover:bg-gray-200 transition-colors flex items-center justify-center ml-25 cursor-pointer"
-                onClick={() => console.log('Create constraint clicked')}
-                title="Create new constraint"
-              >
-                <Plus className="h-4 w-4 text-gray-700" />
-              </button>
+             
             </div>
           </div>
         </div>
