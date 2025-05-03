@@ -275,6 +275,17 @@ const ChatInterface: React.FC = () => {
     setViewConstraintsPanelOpen(true);
   };
 
+  const handleDeleteConstraint = (constraintToDelete: Constraint): void => {
+    // Remove the constraint from both arrays
+    setConstraints((prev) => 
+      prev.filter((c) => c.description !== constraintToDelete.description)
+    );
+    
+    setNewConstraints((prev) => 
+      prev.filter((c) => c.description !== constraintToDelete.description)
+    );
+  };
+
   return (
     <div className='flex h-screen bg-gray-50'>
       <div className='flex-1 flex flex-col border-r border-gray-200 bg-white'>
@@ -434,15 +445,16 @@ const ChatInterface: React.FC = () => {
       >
         <div className='p-4 h-full flex flex-col'>
           <div className='flex-1 overflow-hidden'>
-            <ConstraintsPanel
-              constraints={constraints}
-              newConstraints={newConstraints}
-              violationsList={violationsList}
-              constraintFilter={constraintFilter}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              setConstraintFilter={setConstraintFilter}
-            />
+          <ConstraintsPanel
+            constraints={constraints}
+            newConstraints={newConstraints}
+            violationsList={violationsList}
+            constraintFilter={constraintFilter}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setConstraintFilter={setConstraintFilter}
+            onDeleteConstraint={handleDeleteConstraint} 
+          />
           </div>
 
           {/* Additional story guidance */}
