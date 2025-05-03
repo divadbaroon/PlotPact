@@ -308,7 +308,7 @@ const ChatInterface: React.FC = () => {
           <div className='flex items-center gap-2'>
             <Button onClick={toggleAddConstraint}>Add Constraint</Button>
             <Button
-              variant={violationsList.length > 0 && !violationsViewed ? 'destructive' : 'outline'}
+              variant='outline' 
               size='sm'
               className="text-sm flex items-center gap-1 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-100"
               onClick={() => {
@@ -319,11 +319,6 @@ const ChatInterface: React.FC = () => {
               }}
             >
               <div className='flex items-center'>
-                {violationsList.length > 0 && !violationsViewed && (
-                  <Badge variant='destructive' className='mr-2 text-white'>
-                    {violationsList.length}
-                  </Badge>
-                )}
                 <span className='mr-1'>Story Guide</span>
                 {viewConstraintsPanelOpen ? (
                   <ChevronRight className='h-4 w-4' />
