@@ -12,7 +12,8 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
   activeTab,
   setActiveTab,
   setConstraintFilter,
-  onDeleteConstraint
+  onDeleteConstraint,
+  violationsViewed = false
 }) => {
   return (
     <div className='bg-white border rounded-lg shadow-md overflow-hidden'>
@@ -83,9 +84,9 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
         <button
           className={`flex-1 px-4 py-2 text-sm font-medium cursor-pointer ${
             activeTab === 'violations'
-              ? 'bg-red-50 border-b-2 border-red-500'
-              : violationsList.length > 0
-              ? 'text-red-700 hover:bg-red-50 animate-pulse'
+              ? 'bg-gray-50 border-b-2 border-gray-500'
+              : violationsList.length > 0 && !violationsViewed
+              ? 'text-red-700 hover:bg-red-50'
               : 'text-gray-600 hover:bg-gray-50'
           } transition-all duration-200 hover:shadow-sm`}
           onClick={() => setActiveTab('violations')}
@@ -93,17 +94,17 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
           <div className='flex items-center justify-center gap-2'>
             <AlertCircle
               className={`h-4 w-4 ${
-                activeTab === 'violations' || violationsList.length > 0
+                activeTab === 'violations'
+                  ? 'text-gray-600'
+                  : violationsList.length > 0 && !violationsViewed
                   ? 'text-red-600'
                   : ''
               } transition-colors duration-200`}
             />
-            <span
-              className={activeTab === 'violations' ? 'text-red-700' : ''}
-            >
+            <span className={activeTab === 'violations' ? 'text-gray-700' : ''}>
               Violations
             </span>
-            {violationsList.length > 0 && (
+            {violationsList.length > 0 && !violationsViewed && (
               <Badge
                 variant='destructive'
                 className='ml-1 bg-red-600 text-white'
