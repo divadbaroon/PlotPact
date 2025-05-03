@@ -12,7 +12,7 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
   activeTab,
   setActiveTab,
   setConstraintFilter,
-  onEditConstraint
+  onDeleteConstraint
 }) => {
   return (
     <div className='bg-white border rounded-lg shadow-md overflow-hidden'>
@@ -193,28 +193,28 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
 
       {/* Content Area */}
       <div className='max-h-[60vh] overflow-y-auto p-6'>
-        {activeTab === 'all' && (
-          <AllConstraints 
-            constraints={constraints} 
-            constraintFilter={constraintFilter}
-            onEditConstraint={onEditConstraint}
-          />
-        )}
+      {activeTab === 'all' && (
+        <AllConstraints 
+          constraints={constraints} 
+          constraintFilter={constraintFilter}
+          onDeleteConstraint={onDeleteConstraint}
+        />
+      )}
 
-        {activeTab === 'new' && (
-          <NewConstraints 
-            newConstraints={newConstraints}
-            constraintFilter={constraintFilter}
-            onEditConstraint={onEditConstraint}
-          />
-        )}
+      {activeTab === 'new' && (
+        <NewConstraints 
+          newConstraints={newConstraints}
+          constraintFilter={constraintFilter}
+          onDeleteConstraint={onDeleteConstraint}
+        />
+      )}
 
-        {activeTab === 'violations' && (
-          <ViolationsList 
-            violationsList={violationsList} 
-          />
-        )}
-      </div>
+      {activeTab === 'violations' && (
+        <ViolationsList 
+          violationsList={violationsList} 
+        />
+      )}
+    </div>
     </div>
   );
 };
@@ -223,8 +223,9 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
 const AllConstraints: React.FC<{ 
   constraints: Constraint[], 
   constraintFilter: string,
-  onEditConstraint?: (constraint: Constraint) => void
-}> = ({ constraints, constraintFilter, onEditConstraint }) => {
+  onEditConstraint?: (constraint: Constraint) => void,
+  onDeleteConstraint?: (constraint: Constraint) => void
+}> = ({ constraints, constraintFilter, onEditConstraint, onDeleteConstraint }) => {
   if (constraints.length === 0) {
     return (
       <div className='text-center py-12 px-8'>
@@ -256,6 +257,7 @@ const AllConstraints: React.FC<{
             constraint={constraint} 
             isNew={false}
             onEditConstraint={onEditConstraint}
+            onDeleteConstraint={onDeleteConstraint}
           />
         ))
       }
@@ -266,8 +268,9 @@ const AllConstraints: React.FC<{
 const NewConstraints: React.FC<{ 
   newConstraints: Constraint[],
   constraintFilter: string,
-  onEditConstraint?: (constraint: Constraint) => void
-}> = ({ newConstraints, constraintFilter, onEditConstraint }) => {
+  onEditConstraint?: (constraint: Constraint) => void,
+  onDeleteConstraint?: (constraint: Constraint) => void
+}> = ({ newConstraints, constraintFilter, onEditConstraint, onDeleteConstraint }) => {
   if (newConstraints.length === 0) {
     return (
       <div className='text-center py-12 px-8'>
@@ -299,6 +302,7 @@ const NewConstraints: React.FC<{
             constraint={constraint} 
             isNew={true}
             onEditConstraint={onEditConstraint}
+            onDeleteConstraint={onDeleteConstraint}
           />
         ))}
     </div>
