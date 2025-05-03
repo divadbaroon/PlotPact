@@ -186,7 +186,31 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
                 </div>
               </div>
               
-             
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'flexible' ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setConstraintFilter('flexible')}
+                >
+                  Flexible
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Constraints with some flexibility in interpretation
+                </div>
+              </div>
+              
+              <div className="relative group inline-block">
+                <Badge 
+                  variant={constraintFilter === 'fixed' ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setConstraintFilter('fixed')}
+                >
+                  Fixed
+                </Badge>
+                <div className="absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1 pointer-events-none">
+                  Constraints with rigid requirements
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -250,7 +274,8 @@ const AllConstraints: React.FC<{
         .filter(constraint => 
           constraintFilter === 'all' || 
           constraint.function === constraintFilter ||
-          constraint.type === constraintFilter
+          constraint.type === constraintFilter ||
+          constraint.flexibility === constraintFilter 
         )
         .map((constraint, index) => (
           <ConstraintCard 
@@ -295,7 +320,8 @@ const NewConstraints: React.FC<{
         .filter(constraint => 
           constraintFilter === 'all' || 
           constraint.function === constraintFilter ||
-          constraint.type === constraintFilter
+          constraint.type === constraintFilter ||
+          constraint.flexibility === constraintFilter 
         )
         .map((constraint, index) => (
           <ConstraintCard 
