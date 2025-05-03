@@ -148,6 +148,10 @@ const ChatInterface: React.FC = () => {
         if (data.plot) {
           const initialConstriants = await generateInitialPlotConstraints(data.plot);
           setConstraints(initialConstriants);
+          setNewConstraints(initialConstriants);
+          setActiveTab('new');
+          setCreateConstraintPanelOpen(false);
+          setViewConstraintsPanelOpen(true);
         }
       } finally {
         setLoading(false);
