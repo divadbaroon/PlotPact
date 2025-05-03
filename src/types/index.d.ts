@@ -85,7 +85,7 @@ export interface ConstraintsPanelProps {
   activeTab: 'all' | 'new' | 'violations';
   setActiveTab: (tab: 'all' | 'new' | 'violations') => void;
   setConstraintFilter: (filter: string) => void;
-  onEditConstraint?: (constraint: Constraint) => void;
+  onDeleteConstraint?: (constraint: Constraint) => void;
 }
 
 export interface ConstraintCardProps {
@@ -98,3 +98,17 @@ export type GPTMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
 };
+
+export interface ConstraintCardProps {
+  constraint: Constraint;
+  isNew?: boolean;
+  onEditConstraint?: (constraint: Constraint) => void;
+  onDeleteConstraint?: (constraint: Constraint) => void;
+}
+
+export interface DeleteConstraintDialogProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  constraint: Constraint;
+  onConfirmDelete: (constraint: Constraint) => void;
+}
