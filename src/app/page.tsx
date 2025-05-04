@@ -34,14 +34,25 @@ export default function Home() {
   return (
     <div className='flex flex-col min-h-screen'>
       {/* Hero Section */}
-      <section className='relative bg-gradient-to-b from-primary/10 to-background py-20 px-4 sm:px-6 lg:px-8'>
+      <section className='relative bg-gradient-to-b from-primary/10 to-background py-30 px-4 sm:px-6 lg:px-8'>
+        <div className='absolute inset-0 -z-10'>
+          <Image
+            src='/bg-collab.png' // update this if you use a different name
+            alt='Human and AI storytelling collaboration'
+            fill
+            className='object-cover opacity-30'
+            priority
+          />
+        </div>
+
         <div className='container mx-auto max-w-6xl'>
           <div className='flex flex-col items-center text-center space-y-6 mt-4'>
             <h1 className='text-4xl md:text-6xl font-bold tracking-tight'>
               <span className='text-primary'>Plot</span>Pact
             </h1>
             <p className='text-xl md:text-2xl text-muted-foreground max-w-3xl'>
-              Interactive Storytelling with Human-AI Constraint Negotiation
+              Where your imagination meets the unexpected. Partner with AI to
+              explore story paths shaped by creative constraints.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 mt-8'>
               <Button
@@ -72,9 +83,10 @@ export default function Home() {
         className='py-16 px-4 sm:px-6 lg:px-8 bg-background'
       >
         <div className='text-center mb-12'>
-          <h2 className='text-3xl font-bold mb-4'>Story Mode</h2>
+          <h2 className='text-3xl font-bold mb-4'>Choose Your Creative Path</h2>
           <p className='text-xl text-muted-foreground max-w-3xl mx-auto'>
-            Select how you want to start your story
+            Begin from a blank canvas or pick a curated template — your
+            storytelling journey starts here.
           </p>
         </div>
 
@@ -273,9 +285,9 @@ export default function Home() {
               Why Constraints Spark Creativity
             </h2>
             <p className='text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto'>
-              Constraints don&rsquo;t limit imagination — they ignite it. In PlotPact,
-              you co-create with AI by selecting meaningful constraints that
-              shape, guide, and challenge your storytelling.
+              Constraints don&rsquo;t limit imagination — they ignite it. In
+              PlotPact, you co-create with AI by selecting meaningful
+              constraints that shape, guide, and challenge your storytelling.
             </p>
           </div>
 
@@ -335,8 +347,8 @@ export default function Home() {
                   followed, creating high-stakes boundaries.{' '}
                   <strong>Flexible constraints</strong> offer softer guidance
                   and can be interpreted creatively or re-negotiated if they
-                  don&rsquo;t serve your story&rsquo;s evolution. You control how strict or
-                  open-ended your inspiration is.
+                  don&rsquo;t serve your story&rsquo;s evolution. You control
+                  how strict or open-ended your inspiration is.
                 </p>
               </div>
             </div>
@@ -357,8 +369,8 @@ export default function Home() {
             <h2 className='text-3xl font-bold mb-4'>How PlotPact Works</h2>
             <p className='text-xl text-muted-foreground max-w-3xl mx-auto'>
               PlotPact blends human creativity with AI guidance by using
-              constraints to co-shape stories. Here&rsquo;s how the collaborative
-              process unfolds.
+              constraints to co-shape stories. Here&rsquo;s how the
+              collaborative process unfolds.
             </p>
           </div>
 
@@ -408,8 +420,7 @@ export default function Home() {
                     </p>
                     <p className='text-muted-foreground mt-1'>
                       Write your story freely, but adhere to the active
-                      constraints — they&rsquo;re here to challenge and
-                      inspire.
+                      constraints — they&rsquo;re here to challenge and inspire.
                     </p>
                   </div>
                 </div>
@@ -424,8 +435,8 @@ export default function Home() {
                       Constraint violations are flagged
                     </p>
                     <p className='text-muted-foreground mt-1'>
-                      If your text violates a constraint, you&rsquo;ll receive gentle
-                      feedback so you can revise or rethink creatively.
+                      If your text violates a constraint, you&rsquo;ll receive
+                      gentle feedback so you can revise or rethink creatively.
                     </p>
                     <div className='mt-2 text-sm text-red-600'>
                       Violation detected: constraint not followed
