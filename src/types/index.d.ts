@@ -113,3 +113,29 @@ export interface DeleteConstraintDialogProps {
   constraint: Constraint;
   onConfirmDelete: (constraint: Constraint) => void;
 }
+
+export type SidebarHeaderProps = {
+  activeSection: "overview" | "constraints" | "objectives"
+  setActiveSection: (section: "overview" | "constraints" | "objectives") => void
+  constraintsCount: number
+}
+
+export type OverviewPanelProps = {
+  title: string
+  plot: string
+  image: string
+  onEditClick: () => void
+}
+
+export type Objective = {
+  id: string
+  description: string
+  completed: boolean
+}
+
+export type ObjectivesPanelProps = {
+  objectives: Objective[]
+  onAddObjective: (objective: Objective) => void
+  onToggleObjective: (id: string) => void
+  onDeleteObjective: (id: string) => void
+}
