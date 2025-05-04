@@ -296,6 +296,22 @@ const ChatInterface: React.FC = () => {
     setNewConstraints((prev) => prev.filter((c) => c.description !== constraintToDelete.description))
   }
 
+  // Helper function to allow the user to tab in the text area
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+  
+      // Insert tab character
+      textarea.value = textarea.value.substring(0, start) + '\t' + textarea.value.substring(end);
+      
+      // Move cursor after the tab
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+    }
+  };
+
   const StoryHeader = () => {
     return (
       <div className={`transition-all duration-300 ${isPlotVisible ? 'mb-8' : 'mb-0'}`}>
@@ -417,6 +433,7 @@ const ChatInterface: React.FC = () => {
                   ref={editableRef}
                   className='h-full w-full p-4 border border-gray-300 rounded-md focus:border-gray-300 focus:outline-none bg-white resize-none pr-12'
                   placeholder='Write your story...'
+                  onKeyDown={handleKeyDown}
                 />
 
                 <button
@@ -437,7 +454,6 @@ const ChatInterface: React.FC = () => {
                 </button>
               </div>
             )}
-
             <div ref={scrollAnchorRef} className='h-2' />
           </div>
         </div>
