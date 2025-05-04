@@ -383,13 +383,6 @@ const ChatInterface: React.FC = () => {
 
             {/* Story content */}
             <div className='flex-shrink-0 overflow-y-auto -mb-6'>
-              <div className='prose max-w-none'>
-                {paras.map((text, idx) => (
-                  <p key={idx} className='text-gray-800 leading-relaxed mb-2'>
-                    {text}
-                  </p>
-                ))}
-              </div>
 
               {loading && constraints.length == 0 && (
                 <div className='flex justify-center my-6'>
