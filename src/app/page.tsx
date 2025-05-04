@@ -223,8 +223,9 @@ export default function Home() {
               The Problem We&apos;re Solving
             </h2>
             <p className='text-xl text-muted-foreground max-w-3xl mx-auto'>
-              The advent of LLMs has caused many people to stop thinking about
-              their answers and has affected their creativity.
+              The rise of large language models has made it easy to generate
+              content — but at a cost. People are thinking less, creating less,
+              and collaborating less.
             </p>
           </div>
 

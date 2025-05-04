@@ -4,19 +4,22 @@ import { Trash2 } from 'lucide-react';
 import type { ConstraintCardProps } from '@/types';
 import DeleteConstraintDialog from './DeleteConstraintDialog';
 
-const ConstraintCard: React.FC<ConstraintCardProps> = ({ 
+const ConstraintCard: React.FC<ConstraintCardProps> = ({
   constraint,
   isNew = false,
-  onDeleteConstraint
+  onDeleteConstraint,
 }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  
-  const cardClass = 'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300';
+
+  const cardClass =
+    'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300';
 
   return (
     <>
       <div
-        className={`p-3 rounded-md shadow-sm border ${isNew ? 'bg-green-50 border-green-200' : cardClass} transition-colors hover:shadow-md cursor-default`}
+        className={`p-3 rounded-md shadow-sm border ${
+          isNew ? 'bg-green-50 border-green-200' : cardClass
+        } transition-colors hover:shadow-md cursor-default`}
       >
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
@@ -39,8 +42,8 @@ const ConstraintCard: React.FC<ConstraintCardProps> = ({
                 </Badge>
                 <div className='absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1'>
                   {constraint.flexibility === 'flexible'
-                    ? 'This constraint has some flexibility in interpretation'
-                    : 'This constraint has rigid requirements that must be followed'}
+                    ? 'This constraint is more like a suggestion. You can reinterpret or bend it if needed to serve your story.'
+                    : 'This constraint must be strictly followed. It sets a hard rule that defines the creative boundaries.'}
                 </div>
               </div>
 
@@ -61,8 +64,8 @@ const ConstraintCard: React.FC<ConstraintCardProps> = ({
                   </Badge>
                   <div className='absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1'>
                     {constraint.function === 'exclusionary'
-                      ? 'Rules about what NOT to do in the story'
-                      : 'Rules about what MUST be included'}
+                      ? 'Specifies what must not appear in the story. These remove common ideas to push you in new, less obvious directions.'
+                      : 'Specifies what must be included in the story. These guide your creativity by pointing you toward particular elements or themes.'}
                   </div>
                 </div>
               )}
@@ -78,8 +81,8 @@ const ConstraintCard: React.FC<ConstraintCardProps> = ({
                   </Badge>
                   <div className='absolute z-10 invisible group-hover:visible bg-gray-800 text-white text-xs rounded p-2 w-48 shadow-lg top-full left-0 mt-1'>
                     {constraint.type === 'channel'
-                      ? 'Broad constraints about setting or time period'
-                      : 'Specific elements like characters or objects'}
+                      ? 'A broad theme or category that shapes story direction. Channels give freedom while guiding narrative style or topic.'
+                      : 'A specific item, phrase, or concept that acts as a creative trigger. Anchors narrow focus and inspire concrete ideas.'}
                   </div>
                 </div>
               )}
@@ -88,19 +91,19 @@ const ConstraintCard: React.FC<ConstraintCardProps> = ({
             {/* Constraint reason */}
             <p className='text-xs text-gray-600'>{constraint.reason}</p>
           </div>
-          
+
           {/* Delete button */}
-          <button 
-            className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+          <button
+            className='p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer'
             onClick={() => setDeleteDialogOpen(true)}
-            title="Delete constraint"
-            type="button"
+            title='Delete constraint'
+            type='button'
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className='h-4 w-4' />
           </button>
         </div>
       </div>
-      
+
       {/* Delete confirmation dialog */}
       <DeleteConstraintDialog
         open={deleteDialogOpen}
