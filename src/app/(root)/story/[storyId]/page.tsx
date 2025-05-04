@@ -5,22 +5,13 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Save,
-  BookOpen,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Save, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // import { startChatStory } from '@/lib/actions/startChatGPT';
 // import { sendAnswer } from '@/lib/actions/sendAnswerGPT';
 
-import {
-  verifyContent,
-  generateInitialPlotConstraints,
-} from '@/lib/actions/constraintManager';
+import { verifyContent, generateInitialPlotConstraints } from '@/lib/actions/constraintManager';
 
 import { startTemplateStory } from '@/lib/actions/startTemplateStory';
 
@@ -29,6 +20,7 @@ import type {
   Constraint,
   Violation,
   ViolationState,
+  Objective
 } from '@/types';
 
 // import knight from '../../../../../public/story-images/knight.jpg';
@@ -37,6 +29,9 @@ import lila from '../../../../../public/story-images/lila.png';
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 import ConstraintCreator from '@/components/chat/ConstraintCreator';
 import CreateCustomPlot from '@/components/chat/CreatePlot';
+import SidebarHeader from '@/components/chat/SideberHeader';
+import OverviewPanel from '@/components/chat/OverviewPanel';
+import ObjectivesPanel from '@/components/chat/ObjectivesPanel';
 
 const ChatInterface: React.FC = () => {
   const params = useParams();
@@ -51,13 +46,10 @@ const ChatInterface: React.FC = () => {
 
   const hasInit = useRef(false);
 
-  const [customPlotDialogOpen, setCustomPlotDialogOpen] =
-    useState<boolean>(false);
+  const [customPlotDialogOpen, setCustomPlotDialogOpen] = useState<boolean>(false);
 
-  const [viewConstraintsPanelOpen, setViewConstraintsPanelOpen] =
-    useState<boolean>(false);
-  const [createConstraintPanelOpen, setCreateConstraintPanelOpen] =
-    useState<boolean>(false);
+  const [viewConstraintsPanelOpen, setViewConstraintsPanelOpen] = useState<boolean>(false);
+  const [createConstraintPanelOpen, setCreateConstraintPanelOpen] = useState<boolean>(false);
 
   // const [chatId, setChatId] = useState<string | null>(null);
 
@@ -81,9 +73,7 @@ const ChatInterface: React.FC = () => {
 
   const [violationsViewed, setViolationsViewed] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>(
-    'all'
-  );
+  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all');
 
   const [constraintFilter, setConstraintFilter] = useState<string>('all');
 
@@ -91,97 +81,102 @@ const ChatInterface: React.FC = () => {
 
   const [isPlotVisible, setIsPlotVisible] = useState<boolean>(true);
 
+  const [activeSidebarSection, setActiveSidebarSection] = useState<'overview' | 'constraints' | 'objectives'>(
+    'constraints',
+  );
+  const [objectives, setObjectives] = useState<Objective[]>([]);
+
   // open plot dialogue if custom story
   useEffect(() => {
     if (storyId == 'customStory') {
-      setCustomPlotDialogOpen(true);
+      setCustomPlotDialogOpen(true)
     }
-  }, [storyId]);
+  }, [storyId])
 
   // Used to monitor constraints changes
   useEffect(() => {
-    console.log('Constraints updated:', constraints);
-  }, [constraints]);
+    console.log('Constraints updated:', constraints)
+  }, [constraints])
 
   const streamText = (text: string) => {
-    setStreamingPara('');
-    setIsStreaming(true);
+    setStreamingPara('')
+    setIsStreaming(true)
 
-    const words = text.split(/\s+/);
+    const words = text.split(/\s+/)
 
     //Fix for first word not being streamed
-    let currentWordIndex = -1;
+    let currentWordIndex = -1
 
     const interval = setInterval(() => {
       if (currentWordIndex < words.length) {
-        const prefix = currentWordIndex > -1 ? ' ' : '';
-        setStreamingPara((prev) => prev + prefix + words[currentWordIndex]);
-        currentWordIndex++;
+        const prefix = currentWordIndex > -1 ? ' ' : ''
+        setStreamingPara((prev) => prev + prefix + words[currentWordIndex])
+        currentWordIndex++
       } else {
-        clearInterval(interval);
-        setParas((prev) => [...prev, text]);
+        clearInterval(interval)
+        setParas((prev) => [...prev, text])
 
-        setStreamingPara('');
-        setIsStreaming(false);
+        setStreamingPara('')
+        setIsStreaming(false)
       }
-    }, 50);
-  };
+    }, 50)
+  }
 
   useEffect(() => {
-    scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [paras, streamingPara, violations]);
+    scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [paras, streamingPara, violations])
 
   // Initialize chat
   useEffect(() => {
     // Only initialize once
-    if (hasInit.current) return;
-    hasInit.current = true;
+    if (hasInit.current) return
+    hasInit.current = true
 
     const initChat = async () => {
       try {
-        setLoading(true);
+        setLoading(true)
 
-        const data = startTemplateStory(storyId);
-        setStoryTitle(data.title ?? '');
-        setPlot(data.plot ?? '');
+        const data = startTemplateStory(storyId)
+        setStoryTitle(data.title ?? '')
+        setPlot(data.plot ?? '')
 
         if (data.plot) {
-          const initialConstriants = await generateInitialPlotConstraints(data.plot);
-          setConstraints(initialConstriants);
-          setNewConstraints(initialConstriants);
-          setActiveTab('new');
-          setCreateConstraintPanelOpen(false);
-          setViewConstraintsPanelOpen(true);
+          const initialConstriants = await generateInitialPlotConstraints(data.plot)
+          setConstraints(initialConstriants)
+          setNewConstraints(initialConstriants)
+          setActiveTab('new')
+          setCreateConstraintPanelOpen(false)
+          setViewConstraintsPanelOpen(true)
         }
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    if (storyId !== 'customStory') initChat();
-  }, [storyId]);
+    if (storyId !== 'customStory') initChat()
+  }, [storyId])
 
   // for starting the app with custom plot creation
   const handleSubmitPlot = async () => {
-    setIsSubmittingPlot(true);
+    setIsSubmittingPlot(true)
 
-    if (!plot.trim()) return;
+    if (!plot.trim()) return
 
     try {
-      const plotConstraints = await generateInitialPlotConstraints(plot);
+      const plotConstraints = await generateInitialPlotConstraints(plot)
 
-      setConstraints(plotConstraints);
-      setNewConstraints(plotConstraints);
-      setActiveTab('new');
-      setCreateConstraintPanelOpen(false);
-      setViewConstraintsPanelOpen(true);
+      setConstraints(plotConstraints)
+      setNewConstraints(plotConstraints)
+      setActiveTab('new')
+      setCreateConstraintPanelOpen(false)
+      setViewConstraintsPanelOpen(true)
     } catch (error) {
-      console.error('Error creating custom story:', error);
+      console.error('Error creating custom story:', error)
     } finally {
-      setIsSubmittingPlot(false);
-      setCustomPlotDialogOpen(false);
+      setIsSubmittingPlot(false)
+      setCustomPlotDialogOpen(false)
     }
-  };
+  }
 
   // // Handle "continue" button with original functionality
   // const handleContinue = async () => {
@@ -211,84 +206,84 @@ const ChatInterface: React.FC = () => {
 
   // Handle user input
   const handleSubmit = async () => {
-    if (!editableRef.current) return;
-  
-    const userContent = editableRef.current.value.trim();
-  
-    if (!userContent) return;
-  
+    if (!editableRef.current) return
+
+    const userContent = editableRef.current.value.trim()
+
+    if (!userContent) return
+
     try {
-      console.log('Verifying content against constraints:', constraints);
+      console.log('Verifying content against constraints:', constraints)
       // Verify the content against existing constraints
-      const verificationResult = await verifyContent(
-        userContent,
-        paras,
-        constraints
-      );
-      console.log('Verification result:', verificationResult);
-  
+      const verificationResult = await verifyContent(userContent, paras, constraints)
+      console.log('Verification result:', verificationResult)
+
       if (!verificationResult.isValid) {
-        setViolations(verificationResult.violations);
-  
+        setViolations(verificationResult.violations)
+
         setViolationsList((prev) => [
           ...prev,
           {
             violations: [...verificationResult.violations],
             sentContent: userContent,
           },
-        ]);
-  
+        ])
 
+        setViewConstraintsPanelOpen(true)
+        setActiveTab('violations')
+        setCreateConstraintPanelOpen(false)
 
-        setViewConstraintsPanelOpen(true);
-        setActiveTab('violations');
-        setCreateConstraintPanelOpen(false);
-  
-        return;
+        return
       }
-  
-      setLoading(true);
-      setViolations([]);
-  
+
+      setLoading(true)
+      setViolations([])
+
       // Add the content directly to the story without streaming
-      setParas((prev) => [...prev, userContent]);
-      setLoading(false);
-  
-   
+      setParas((prev) => [...prev, userContent])
+      setLoading(false)
     } catch (error) {
-      console.error('Error processing input:', error);
-      setLoading(false);
+      console.error('Error processing input:', error)
+      setLoading(false)
     }
-  };
+  }
 
   const toggleViewConstraints = (): void => {
-    setCreateConstraintPanelOpen(false);
-    setViewConstraintsPanelOpen(!viewConstraintsPanelOpen);
-  };
+    setCreateConstraintPanelOpen(false)
+    setViewConstraintsPanelOpen(!viewConstraintsPanelOpen)
+  }
 
   const toggleAddConstraint = (): void => {
-    setViewConstraintsPanelOpen(false);
-    setCreateConstraintPanelOpen(!createConstraintPanelOpen);
-  };
+    setViewConstraintsPanelOpen(false)
+    setCreateConstraintPanelOpen(!createConstraintPanelOpen)
+  }
 
   const handleAddConstraint = (newConstraints: Constraint[]): void => {
-    setConstraints((prev) => [...prev, ...newConstraints]);
-    setNewConstraints(newConstraints);
-    setActiveTab('new');
-    setCreateConstraintPanelOpen(false);
-    setViewConstraintsPanelOpen(true);
-  };
+    setConstraints((prev) => [...prev, ...newConstraints])
+    setNewConstraints(newConstraints)
+    setActiveTab('new')
+    setCreateConstraintPanelOpen(false)
+    setViewConstraintsPanelOpen(true)
+  }
 
   const handleDeleteConstraint = (constraintToDelete: Constraint): void => {
     // Remove the constraint from both arrays
-    setConstraints((prev) => 
-      prev.filter((c) => c.description !== constraintToDelete.description)
-    );
-    
-    setNewConstraints((prev) => 
-      prev.filter((c) => c.description !== constraintToDelete.description)
-    );
-  };
+    setConstraints((prev) => prev.filter((c) => c.description !== constraintToDelete.description))
+
+    setNewConstraints((prev) => prev.filter((c) => c.description !== constraintToDelete.description))
+  }
+
+  const handleAddObjective = (objective: Objective): void => {
+    setObjectives((prev) => [...prev, objective])
+  }
+
+  const handleToggleObjective = (id: string): void => {
+    setObjectives((prev) => prev.map((obj) => (obj.id === id ? { ...obj, completed: !obj.completed } : obj)))
+  }
+
+  const handleDeleteObjective = (id: string): void => {
+    setObjectives((prev) => prev.filter((obj) => obj.id !== id))
+  }
 
   const StoryHeader = () => {
     return (
@@ -299,21 +294,12 @@ const ChatInterface: React.FC = () => {
               <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 mb-6'>
                 <div className='relative h-64 w-full'>
                   <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
-                  <Image
-                    src={lila}
-                    alt={storyTitle}
-                    fill
-                    className='object-cover'
-                  />
+                  <Image src={lila || '/placeholder.svg'} alt={storyTitle} fill className='object-cover' />
                 </div>
                 <div className='p-6 relative'>
-                  <h1 className='text-2xl font-bold mb-2 text-gray-800'>
-                    {storyTitle}
-                  </h1>
-                  <p className='text-muted-foreground text-sm'>
-                    {plot}
-                  </p>
-                  
+                  <h1 className='text-2xl font-bold mb-2 text-gray-800'>{storyTitle}</h1>
+                  <p className='text-muted-foreground text-sm'>{plot}</p>
+
                   <button
                     onClick={() => setIsPlotVisible(false)}
                     className='absolute bottom-3 right-4 text-gray-400 hover:text-gray-700 text-sm flex items-center gap-1 transition-all duration-200 hover:scale-110 cursor-pointer'
@@ -325,20 +311,20 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         {!isPlotVisible && (
           <div className='flex justify-center'>
             <button
               onClick={() => setIsPlotVisible(true)}
               className='text-gray-400 hover:text-gray-700 text-sm transition-all duration-200 hover:scale-105 cursor-pointer'
-              >
+            >
               Show Story Details ↓
             </button>
           </div>
         )}
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div className='flex h-screen bg-gray-50'>
@@ -357,23 +343,19 @@ const ChatInterface: React.FC = () => {
           <div className='flex items-center gap-2'>
             <Button onClick={toggleAddConstraint}>Add Constraint</Button>
             <Button
-              variant='outline' 
+              variant='outline'
               size='sm'
-              className="text-sm flex items-center gap-1 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-100"
+              className='text-sm flex items-center gap-1 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-100'
               onClick={() => {
-                toggleViewConstraints();
+                toggleViewConstraints()
                 if (activeTab === 'violations') {
-                  setViolationsViewed(true);
+                  setViolationsViewed(true)
                 }
               }}
             >
               <div className='flex items-center'>
                 <span className='mr-1'>Story Guide</span>
-                {viewConstraintsPanelOpen ? (
-                  <ChevronRight className='h-4 w-4' />
-                ) : (
-                  <ChevronLeft className='h-4 w-4' />
-                )}
+                {viewConstraintsPanelOpen ? <ChevronRight className='h-4 w-4' /> : <ChevronLeft className='h-4 w-4' />}
               </div>
             </Button>
           </div>
@@ -383,7 +365,7 @@ const ChatInterface: React.FC = () => {
           <div className='max-w-3xl mx-auto w-full h-full flex flex-col'>
             <div className='flex-shrink-0 mb-6'>
               <StoryHeader />
-              
+
               <CreateCustomPlot
                 title={storyTitle}
                 plot={plot}
@@ -432,11 +414,11 @@ const ChatInterface: React.FC = () => {
                   className='h-full w-full p-4 border border-gray-300 rounded-md focus:border-gray-300 focus:outline-none bg-white resize-none pr-12'
                   placeholder='Write your story...'
                 />
-                
+
                 <button
                   onClick={handleSubmit}
                   className='absolute right-3 bottom-3 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer'
-                  title="Save"
+                  title='Save'
                 >
                   <Save className='h-5 w-5 text-gray-500 hover:text-gray-700' />
                 </button>
@@ -455,32 +437,56 @@ const ChatInterface: React.FC = () => {
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
       >
         <div className='p-4 h-full flex flex-col'>
-          <div className='flex-1 overflow-hidden'>
-          <ConstraintsPanel
-            constraints={constraints}
-            newConstraints={newConstraints}
-            violationsList={violationsList}
-            constraintFilter={constraintFilter}
-            activeTab={activeTab}
-            setActiveTab={(tab) => {
-              setActiveTab(tab);
-              // Mark violations as viewed when that tab is selected
-              if (tab === 'violations') {
-                setViolationsViewed(true);
-              }
-            }}
-            setConstraintFilter={setConstraintFilter}
-            onDeleteConstraint={handleDeleteConstraint}
-            violationsViewed={violationsViewed}
+        <SidebarHeader
+            activeSection={activeSidebarSection}
+            setActiveSection={setActiveSidebarSection}
+            constraintsCount={constraints.length}
           />
+
+          <div className='flex-1 overflow-hidden'>
+            {activeSidebarSection === 'overview' && (
+              <OverviewPanel
+                title={storyTitle}
+                plot={plot}
+                image={lila.src}
+                onEditClick={() => setCustomPlotDialogOpen(true)}
+              />
+            )}
+
+            {activeSidebarSection === 'constraints' && (
+              <ConstraintsPanel
+                constraints={constraints}
+                newConstraints={newConstraints}
+                violationsList={violationsList}
+                constraintFilter={constraintFilter}
+                activeTab={activeTab}
+                setActiveTab={(tab) => {
+                  setActiveTab(tab)
+                  // Mark violations as viewed when that tab is selected
+                  if (tab === 'violations') {
+                    setViolationsViewed(true)
+                  }
+                }}
+                setConstraintFilter={setConstraintFilter}
+                onDeleteConstraint={handleDeleteConstraint}
+                violationsViewed={violationsViewed}
+              />
+            )}
+
+            {activeSidebarSection === 'objectives' && (
+              <ObjectivesPanel
+                objectives={objectives}
+                onAddObjective={handleAddObjective}
+                onToggleObjective={handleToggleObjective}
+                onDeleteObjective={handleDeleteObjective}
+              />
+            )}
           </div>
 
           {/* Additional story guidance */}
           <div className='mt-4 pt-4 border-t border-gray-200'>
             <div className='text-sm text-gray-600'>
-              <h4 className='font-medium text-gray-800 mb-1'>
-                Story Consistency Tips:
-              </h4>
+              <h4 className='font-medium text-gray-800 mb-1'>Story Consistency Tips:</h4>
               <ul className='list-disc pl-4 space-y-1'>
                 <li className='hover:text-gray-800 transition-colors duration-200'>
                   Keep character traits and motivations consistent
@@ -515,7 +521,7 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatInterface;
+export default ChatInterface
