@@ -9,7 +9,6 @@ import { ObjectivesPanelProps } from "@/types"
 
 const ObjectivesPanel: React.FC<ObjectivesPanelProps> = ({
   objectives,
-  onAddObjective,
   onToggleObjective,
   onDeleteObjective,
 }) => {
