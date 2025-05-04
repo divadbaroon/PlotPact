@@ -62,8 +62,10 @@ const ChatInterface: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [paras, setParas] = useState<string[]>([]);
-  // const [streamingPara, setStreamingPara] = useState<string>('');
-  // const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingPara, setStreamingPara] = useState<string>('');
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const [constraints, setConstraints] = useState<Constraint[]>([]);
   const [newConstraints, setNewConstraints] = useState<Constraint[]>([]);
@@ -98,31 +100,34 @@ const ChatInterface: React.FC = () => {
     console.log('Constraints updated:', constraints)
   }, [constraints])
 
-  // const streamText = (text: string) => {
-    // setStreamingPara('')
-    // setIsStreaming(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const streamText = (text: string) => {
+    setStreamingPara('')
+    setIsStreaming(true)
 
-    // const words = text.split(/\s+/)
+    const words = text.split(/\s+/)
 
     //Fix for first word not being streamed
-    // let currentWordIndex = -1
+    let currentWordIndex = -1
 
-    // const interval = setInterval(() => {
-      // if (currentWordIndex < words.length) {
-        // const prefix = currentWordIndex > -1 ? ' ' : ''
-        // setStreamingPara((prev) => prev + prefix + words[currentWordIndex])
-        // currentWordIndex++
-      // } else {
-        // clearInterval(interval)
-        // setParas((prev) => [...prev, text])
+    const interval = setInterval(() => {
+      if (currentWordIndex < words.length) {
+        const prefix = currentWordIndex > -1 ? ' ' : ''
+        setStreamingPara((prev) => prev + prefix + words[currentWordIndex])
+        currentWordIndex++
+      } else {
+        clearInterval(interval)
+        setParas((prev) => [...prev, text])
 
-        // setStreamingPara('')
-        // setIsStreaming(false)
-      // }
-    // }, 50)
-  // }
+        setStreamingPara('')
+        setIsStreaming(false)
+      }
+    }, 50)
+  }
 
-
+  useEffect(() => {
+    scrollAnchorRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [paras, streamingPara, violations])
 
   // Initialize chat
   useEffect(() => {
