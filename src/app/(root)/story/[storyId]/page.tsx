@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Loader2, Save, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Save, BookOpen, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // import { startChatStory } from '@/lib/actions/startChatGPT';
@@ -20,7 +20,6 @@ import type {
   Constraint,
   Violation,
   ViolationState,
-  Objective
 } from '@/types';
 
 // import knight from '../../../../../public/story-images/knight.jpg';
@@ -29,9 +28,9 @@ import lila from '../../../../../public/story-images/lila.png';
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
 import ConstraintCreator from '@/components/chat/ConstraintCreator';
 import CreateCustomPlot from '@/components/chat/CreatePlot';
-import SidebarHeader from '@/components/chat/SideberHeader';
-import OverviewPanel from '@/components/chat/OverviewPanel';
-import ObjectivesPanel from '@/components/chat/ObjectivesPanel';
+// import SidebarHeader from '@/components/chat/SideberHeader';
+// import OverviewPanel from '@/components/chat/OverviewPanel';
+// import ObjectivesPanel from '@/components/chat/ObjectivesPanel';
 
 const ChatInterface: React.FC = () => {
   const params = useParams();
@@ -83,10 +82,12 @@ const ChatInterface: React.FC = () => {
 
   const [isPlotVisible, setIsPlotVisible] = useState<boolean>(true);
 
-  const [activeSidebarSection, setActiveSidebarSection] = useState<'overview' | 'constraints' | 'objectives'>(
-    'constraints',
-  );
-  const [objectives, setObjectives] = useState<Objective[]>([]);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  // const [activeSidebarSection, setActiveSidebarSection] = useState<'overview' | 'constraints' | 'objectives'>(
+    // 'constraints',
+  // );
+  // const [objectives, setObjectives] = useState<Objective[]>([]);
 
   // open plot dialogue if custom story
   useEffect(() => {
@@ -209,47 +210,66 @@ const ChatInterface: React.FC = () => {
 
   // Handle user input
   const handleSubmit = async () => {
-    if (!editableRef.current) return
-
-    const userContent = editableRef.current.value.trim()
-
-    if (!userContent) return
-
+    if (!editableRef.current) return;
+  
+    const userContent = editableRef.current.value.trim();
+  
+    if (!userContent) return;
+  
     try {
-      console.log('Verifying content against constraints:', constraints)
+      // Set to saving state
+      setSaveStatus('saving');
+      
+      console.log('Verifying content against constraints:', constraints);
       // Verify the content against existing constraints
-      const verificationResult = await verifyContent(userContent, paras, constraints)
-      console.log('Verification result:', verificationResult)
-
+      const verificationResult = await verifyContent(
+        userContent,
+        paras,
+        constraints
+      );
+      console.log('Verification result:', verificationResult);
+  
       if (!verificationResult.isValid) {
-        setViolations(verificationResult.violations)
-
+        setViolations(verificationResult.violations);
+  
         setViolationsList((prev) => [
           ...prev,
           {
             violations: [...verificationResult.violations],
             sentContent: userContent,
           },
-        ])
-
-        setViewConstraintsPanelOpen(true)
-        setActiveTab('violations')
-        setCreateConstraintPanelOpen(false)
-
-        return
+        ]);
+  
+        // Auto-open the constraints panel and switch to violations tab
+        setViewConstraintsPanelOpen(true);
+        setActiveTab('violations');
+        setCreateConstraintPanelOpen(false);
+  
+        // Reset save status on error
+        setSaveStatus('idle');
+  
+        return;
       }
-
-      setLoading(true)
-      setViolations([])
-
+  
+      setLoading(true);
+      setViolations([]);
+  
       // Add the content directly to the story without streaming
-      setParas((prev) => [...prev, userContent])
-      setLoading(false)
+      setParas((prev) => [...prev, userContent]);
+      setLoading(false);
+  
+      // Set to saved state for 2 seconds
+      setSaveStatus('saved');
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 2000);
+  
     } catch (error) {
-      console.error('Error processing input:', error)
-      setLoading(false)
+      console.error('Error processing input:', error);
+      setLoading(false);
+      setSaveStatus('idle');
     }
-  }
+  };
 
   const toggleViewConstraints = (): void => {
     setCreateConstraintPanelOpen(false)
@@ -274,18 +294,6 @@ const ChatInterface: React.FC = () => {
     setConstraints((prev) => prev.filter((c) => c.description !== constraintToDelete.description))
 
     setNewConstraints((prev) => prev.filter((c) => c.description !== constraintToDelete.description))
-  }
-
-  const handleAddObjective = (objective: Objective): void => {
-    setObjectives((prev) => [...prev, objective])
-  }
-
-  const handleToggleObjective = (id: string): void => {
-    setObjectives((prev) => prev.map((obj) => (obj.id === id ? { ...obj, completed: !obj.completed } : obj)))
-  }
-
-  const handleDeleteObjective = (id: string): void => {
-    setObjectives((prev) => prev.filter((obj) => obj.id !== id))
   }
 
   const StoryHeader = () => {
@@ -319,7 +327,7 @@ const ChatInterface: React.FC = () => {
           <div className='flex justify-center'>
             <button
               onClick={() => setIsPlotVisible(true)}
-              className='text-gray-400 hover:text-gray-700 text-sm transition-all duration-200 hover:scale-105 cursor-pointer'
+              className='text-gray-400 hover:text-gray-700 text-sm transition-all duration-200 hover:scale-105 cursor-pointer mb-3'
             >
               Show Story Details ↓
             </button>
@@ -414,9 +422,18 @@ const ChatInterface: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   className='absolute right-3 bottom-3 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer'
-                  title='Save'
+                  title={saveStatus === 'saved' ? 'Saved!' : 'Save'}
+                  disabled={saveStatus === 'saving'}
                 >
-                  <Save className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                  {saveStatus === 'saving' && (
+                    <Loader2 className='h-5 w-5 text-gray-500 animate-spin' />
+                  )}
+                  {saveStatus === 'saved' && (
+                    <CheckCircle2 className='h-5 w-5 text-green-600' />
+                  )}
+                  {saveStatus === 'idle' && (
+                    <Save className='h-5 w-5 text-gray-500 hover:text-gray-700' />
+                  )}
                 </button>
               </div>
             )}
