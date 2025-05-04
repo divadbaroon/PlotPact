@@ -433,50 +433,24 @@ const ChatInterface: React.FC = () => {
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
       >
         <div className='p-4 h-full flex flex-col'>
-        <SidebarHeader
-            activeSection={activeSidebarSection}
-            setActiveSection={setActiveSidebarSection}
-            constraintsCount={constraints.length}
-          />
-
           <div className='flex-1 overflow-hidden'>
-            {activeSidebarSection === 'overview' && (
-              <OverviewPanel
-                title={storyTitle}
-                plot={plot}
-                image={lila.src}
-                onEditClick={() => setCustomPlotDialogOpen(true)}
-              />
-            )}
-
-            {activeSidebarSection === 'constraints' && (
-              <ConstraintsPanel
-                constraints={constraints}
-                newConstraints={newConstraints}
-                violationsList={violationsList}
-                constraintFilter={constraintFilter}
-                activeTab={activeTab}
-                setActiveTab={(tab) => {
-                  setActiveTab(tab)
-                  // Mark violations as viewed when that tab is selected
-                  if (tab === 'violations') {
-                    setViolationsViewed(true)
-                  }
-                }}
-                setConstraintFilter={setConstraintFilter}
-                onDeleteConstraint={handleDeleteConstraint}
-                violationsViewed={violationsViewed}
-              />
-            )}
-
-            {activeSidebarSection === 'objectives' && (
-              <ObjectivesPanel
-                objectives={objectives}
-                onAddObjective={handleAddObjective}
-                onToggleObjective={handleToggleObjective}
-                onDeleteObjective={handleDeleteObjective}
-              />
-            )}
+            <ConstraintsPanel
+              constraints={constraints}
+              newConstraints={newConstraints}
+              violationsList={violationsList}
+              constraintFilter={constraintFilter}
+              activeTab={activeTab}
+              setActiveTab={(tab) => {
+                setActiveTab(tab)
+                // Mark violations as viewed when that tab is selected
+                if (tab === 'violations') {
+                  setViolationsViewed(true)
+                }
+              }}
+              setConstraintFilter={setConstraintFilter}
+              onDeleteConstraint={handleDeleteConstraint}
+              violationsViewed={violationsViewed}
+            />
           </div>
 
           {/* Additional story guidance */}
