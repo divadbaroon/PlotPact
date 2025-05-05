@@ -72,8 +72,6 @@ const ChatInterface: React.FC = () => {
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
 
-  const [violationsViewed, setViolationsViewed] = useState(false);
-
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all');
 
   const [constraintFilter, setConstraintFilter] = useState<string>('all');
@@ -440,9 +438,6 @@ const ChatInterface: React.FC = () => {
               className='text-sm flex items-center gap-1 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 hover:bg-gray-100'
               onClick={() => {
                 toggleViewConstraints()
-                if (activeTab === 'violations') {
-                  setViolationsViewed(true)
-                }
               }}
             >
               <div className='flex items-center'>
@@ -540,14 +535,9 @@ const ChatInterface: React.FC = () => {
               activeTab={activeTab}
               setActiveTab={(tab) => {
                 setActiveTab(tab)
-                // Mark violations as viewed when that tab is selected
-                if (tab === 'violations') {
-                  setViolationsViewed(true)
-                }
               }}
               setConstraintFilter={setConstraintFilter}
               onDeleteConstraint={handleDeleteConstraint}
-              violationsViewed={violationsViewed}
             />
           </div>
 
