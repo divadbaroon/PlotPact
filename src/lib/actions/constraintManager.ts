@@ -204,7 +204,7 @@ export async function verifyContent(
 
     const prompt = `Verify if this new content follows established story constraints. The threshold to accept should be very low - if the content fits the story in any reasonable way, it should be accepted.
     
-    Users are free to take the story in different directions and are not bound to follow previous plot developments. Only check that the content respects the broader constraints about setting, time period, and established character traits.
+    Users are free to take the story in different directions and are not bound to follow previous plot developments. Only check that the content respects the constraints broadly.
 
     If a violation is found, identify the specific part of the content that violates the constraint.
 
