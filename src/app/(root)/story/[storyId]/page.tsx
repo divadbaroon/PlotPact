@@ -22,7 +22,7 @@ import type {
   ViolationState,
 } from '@/types';
 
-// import knight from '../../../../../public/story-images/knight.jpg';
+import knight from '../../../../../public/story-images/knight.jpg';
 import lila from '../../../../../public/story-images/lila.png';
 
 import ConstraintsPanel from '@/components/chat/ConstaintPanel';
@@ -313,20 +313,46 @@ const ChatInterface: React.FC = () => {
   };
 
   const StoryHeader = () => {
+    
+    // Helper function to determine which image to show
+    const getStoryImage = () => {
+      switch(storyId) {
+        case '1':
+          return lila;
+        case '2':
+          return knight;
+        case 'customStory':
+          return null; 
+        default:
+          return null;
+      }
+    };
+  
+    const storyImage = getStoryImage();
+  
     return (
       <div className={`transition-all duration-300 ${isPlotVisible ? 'mb-8' : 'mb-0'}`}>
         {isPlotVisible && (
           <div className='max-w-3xl mx-auto'>
             <div className='group cursor-default'>
               <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 mb-6'>
-                <div className='relative h-64 w-full'>
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
-                  <Image src={lila || '/placeholder.svg'} alt={storyTitle} fill className='object-cover' />
-                </div>
+                // Show image if it exists
+                {storyImage && (
+                  <div className='relative h-64 w-full'>
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
+                    <Image 
+                      src={storyImage} 
+                      alt={storyTitle} 
+                      fill 
+                      className='object-cover' 
+                    />
+                  </div>
+                )}
+                
                 <div className='p-6 relative'>
                   <h1 className='text-2xl font-bold mb-2 text-gray-800'>{storyTitle}</h1>
                   <p className='text-muted-foreground text-sm'>{plot}</p>
-
+  
                   <button
                     onClick={() => setIsPlotVisible(false)}
                     className='absolute bottom-3 right-4 text-gray-400 hover:text-gray-700 text-sm flex items-center gap-1 transition-all duration-200 hover:scale-110 cursor-pointer'
@@ -338,7 +364,7 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
         )}
-
+  
         {!isPlotVisible && (
           <div className='flex justify-center'>
             <button
