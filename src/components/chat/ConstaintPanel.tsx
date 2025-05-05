@@ -437,10 +437,18 @@ const ViolationsList: React.FC<{
       {/* Current Violations Section */}
       <div>
         <div className='flex items-center justify-between mb-4'>
-          <h3 className='text-sm font-semibold text-red-700'>Current Violations</h3>
+          <h3 className={`text-sm font-semibold ${
+            violationsList.length > 0 ? 'text-red-700' : 'text-gray-700'
+          }`}>
+            Current Violations
+          </h3>
           <Badge 
-            variant='destructive' 
-            className='bg-red-600 text-white'
+            variant={violationsList.length > 0 ? 'destructive' : 'outline'}
+            className={`${
+              violationsList.length > 0 
+                ? 'bg-red-600 text-white' 
+                : 'bg-gray-100 text-gray-700'
+            }`}
           >
             {violationsList.length}
           </Badge>
