@@ -26,6 +26,7 @@ export interface ConstraintStructure {
 export interface Violation {
   constraintType: string;
   explanation: string;
+  violatingContent?: string;
 }
 
 export interface ViolationState {
