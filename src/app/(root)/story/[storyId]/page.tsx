@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Loader2, Save, BookOpen, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Save, BookOpen, CheckCircle, CheckCircle2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // import { startChatStory } from '@/lib/actions/startChatGPT';
@@ -83,6 +83,17 @@ const ChatInterface: React.FC = () => {
   const [isPlotVisible, setIsPlotVisible] = useState<boolean>(true);
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  const [showToast, setShowToast] = useState(false);
+  // Stored in localStorage 
+  const [hideToastPreference, setHideToastPreference] = useState(() => {
+    // Check localStorage for user preference
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideConstraintToast') === 'true';
+    }
+    return false;
+  });
+  
 
   // const [activeSidebarSection, setActiveSidebarSection] = useState<'overview' | 'constraints' | 'objectives'>(
     // 'constraints',
@@ -211,11 +222,11 @@ const ChatInterface: React.FC = () => {
   // Handle user input
   const handleSubmit = async () => {
     if (!editableRef.current) return;
-  
+    
     const userContent = editableRef.current.value.trim();
-  
+    
     if (!userContent) return;
-  
+    
     try {
       // Set to saving state
       setSaveStatus('saving');
@@ -228,10 +239,10 @@ const ChatInterface: React.FC = () => {
         constraints
       );
       console.log('Verification result:', verificationResult);
-  
+    
       if (!verificationResult.isValid) {
         setViolations(verificationResult.violations);
-  
+    
         setViolationsList((prev) => [
           ...prev,
           {
@@ -239,37 +250,59 @@ const ChatInterface: React.FC = () => {
             sentContent: userContent,
           },
         ]);
-  
+    
         // Auto-open the constraints panel and switch to violations tab
         setViewConstraintsPanelOpen(true);
         setActiveTab('violations');
         setCreateConstraintPanelOpen(false);
-  
+    
         // Reset save status on error
         setSaveStatus('idle');
-  
+    
         return;
       }
-  
+    
       setLoading(true);
       setViolations([]);
-  
+    
       // Add the content directly to the story without streaming
       setParas((prev) => [...prev, userContent]);
       setLoading(false);
-  
+    
       // Set to saved state for 2 seconds
       setSaveStatus('saved');
       setTimeout(() => {
         setSaveStatus('idle');
       }, 2000);
-  
+
+      // Show success toast for constraint passing
+      if (constraints.length > 0 && !hideToastPreference) {
+        setShowToast(true);
+        const autoHideTimer = setTimeout(() => {
+          setShowToast(false);
+        }, 5000);
+    
+        return () => clearTimeout(autoHideTimer);
+      }
     } catch (error) {
       console.error('Error processing input:', error);
       setLoading(false);
       setSaveStatus('idle');
     }
   };
+
+  // Helper method for toast
+  const handleDontShowAgain = () => {
+    setHideToastPreference(true);
+    localStorage.setItem('hideConstraintToast', 'true');
+    setShowToast(false);
+  };
+  
+  // Helper method for toast
+  const handleCloseToast = () => {
+    setShowToast(false);
+  };
+
 
   const toggleViewConstraints = (): void => {
     setCreateConstraintPanelOpen(false)
@@ -336,7 +369,6 @@ const ChatInterface: React.FC = () => {
           <div className='max-w-3xl mx-auto'>
             <div className='group cursor-default'>
               <div className='bg-card rounded-lg overflow-hidden shadow-md transition-all duration-300 mb-6'>
-                // Show image if it exists
                 {storyImage && (
                   <div className='relative h-64 w-full'>
                     <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10' />
@@ -438,7 +470,7 @@ const ChatInterface: React.FC = () => {
                 <div className='flex justify-center my-6'>
                   <div className='flex flex-col items-center justify-center'>
                     <Loader2 className='h-10 w-10 text-gray-500 animate-spin' />
-                    <div className='mt-3'>
+                    <div className='mt-1'>
                       <p>Setting up your story and generating constraints...</p>
                     </div>
                   </div>
@@ -549,6 +581,40 @@ const ChatInterface: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showToast && (
+      <div className={`fixed bottom-4 right-4 bg-white border border-green-200 text-gray-800 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${
+        showToast ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+      }`}>
+        <div className='flex items-start gap-3 p-4'>
+          <div className='flex-shrink-0'>
+            <CheckCircle className='h-6 w-6 text-green-600' />
+          </div>
+          <div className='flex-grow'>
+            <h3 className='font-medium text-lg'>All Constraints Met, Good Job!</h3>
+            <p className='text-sm text-gray-600 mt-1'>Your writing follows all active story constraints.</p>
+          </div>
+          <button
+            onClick={handleCloseToast}
+            className='flex-shrink-0 text-gray-400 hover:text-gray-600 p-1'
+            aria-label="Close"
+          >
+            <X className='h-5 w-5' />
+          </button>
+        </div>
+        <div className='border-t border-gray-200 px-4 py-3'>
+          <label className='flex items-center gap-2 text-sm text-gray-600 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={false}
+              onChange={handleDontShowAgain}
+              className='w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500'
+            />
+            Don't show again
+          </label>
+        </div>
+      </div>
+    )}
     </div>
   )
 }
