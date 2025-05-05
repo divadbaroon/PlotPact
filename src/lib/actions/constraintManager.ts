@@ -206,6 +206,8 @@ export async function verifyContent(
     
     Users are free to take the story in different directions and are not bound to follow previous plot developments. Only check that the content respects the broader constraints about setting, time period, and established character traits.
 
+    If a violation is found, identify the specific part of the content that violates the constraint.
+
     Story context:
     ${storyContext.join('\n')};
 
@@ -221,7 +223,8 @@ export async function verifyContent(
       "violations": [
         {
           "constraintType": string,
-          "explanation": string
+          "explanation": string,
+          "violatingContent": string
         }
       ]
     }`;
