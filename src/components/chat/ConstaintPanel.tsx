@@ -110,14 +110,6 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
             <span className={violationsList.length > 0 ? 'text-red-700' : activeTab === 'violations' ? 'text-gray-700' : ''}>
               Violations
             </span>
-            {violationsList.length > 0 && (
-              <Badge
-                variant='destructive'
-                className='ml-1 bg-red-600 text-white'
-              >
-                {violationsList.length}
-              </Badge>
-            )}
           </div>
         </button>
       </div>
