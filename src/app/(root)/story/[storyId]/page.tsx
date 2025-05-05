@@ -243,11 +243,18 @@ const ChatInterface: React.FC = () => {
       if (!verificationResult.isValid) {
         setViolations(verificationResult.violations);
     
+        const violationWithSpecificContent = verificationResult.violations.map((violation: Violation) => ({
+          ...violation,
+          // If violatingContent is provided by the GPT, use it; otherwise default to full content
+          violatingContent: violation.violatingContent || userContent
+        }));
+    
         setViolationsList((prev) => [
           ...prev,
           {
-            violations: [...verificationResult.violations],
-            sentContent: userContent,
+            violations: violationWithSpecificContent,
+            // Use the specific violating content if available, otherwise fall back to full content
+            sentContent: violationWithSpecificContent[0]?.violatingContent || userContent,
           },
         ]);
     
