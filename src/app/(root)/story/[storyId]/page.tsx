@@ -297,7 +297,7 @@ const ChatInterface: React.FC = () => {
     localStorage.setItem('hideConstraintToast', 'true');
     setShowToast(false);
   };
-  
+
   // Helper method for toast
   const handleCloseToast = () => {
     setShowToast(false);
@@ -610,7 +610,7 @@ const ChatInterface: React.FC = () => {
               onChange={handleDontShowAgain}
               className='w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500'
             />
-            Don't show again
+            Don&apos;t show again
           </label>
         </div>
       </div>
