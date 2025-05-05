@@ -82,6 +82,7 @@ export interface ConstraintsPanelProps {
   constraints: Constraint[];
   newConstraints: Constraint[];
   violationsList: ViolationState[];
+  pastViolations: ViolationState[];
   constraintFilter: string;
   activeTab: 'all' | 'new' | 'violations';
   setActiveTab: (tab: 'all' | 'new' | 'violations') => void;
