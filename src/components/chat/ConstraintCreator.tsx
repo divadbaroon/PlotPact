@@ -46,6 +46,11 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
   const [generatedConstraints, setGeneratedConstraints] = useState<
     Constraint[] | null
   >(null);
+
+  const [allGeneratedConstraints, setAllGeneratedConstraints] = useState<
+    Constraint[] | null
+  >(null);
+
   const [infoPopover, setInfoPopover] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,17 +90,30 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
       storyContext,
       existingConstraints,
       constraintSpecifics,
-      constraintCount
+      constraintCount,
+      allGeneratedConstraints
     );
   };
 
   const handleGenerateConstraint = async () => {
     if (!functionType || !constraintType || !flexibility) return;
 
-    setGeneratedConstraints(null);
+    // setGeneratedConstraints(null);
     setIsLoading(true);
     try {
       const constraints = await generateConstraints();
+
+      // if (allGeneratedConstraints)
+      // setAllGeneratedConstraints((prev) => [...prev, ...constraints]);
+
+      // setAllGeneratedConstraints((prev) => [...prev, ...(constraints ?? [])]);
+
+      setAllGeneratedConstraints((prev) => [
+        ...(prev ?? []),
+        ...(constraints ?? []),
+      ]);
+
+      setGeneratedConstraints(null);
       setGeneratedConstraints(constraints);
       scrollToBottom();
     } catch (err) {
@@ -117,10 +135,19 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
   };
 
   const handleRegenerateConstraints = async () => {
-    setGeneratedConstraints(null);
+    // setGeneratedConstraints(null);
     setIsLoading(true);
     try {
       const constraints = await generateConstraints();
+
+      // setAllGeneratedConstraints((prev) => [...prev, ...constraints]);
+
+      setAllGeneratedConstraints((prev) => [
+        ...(prev ?? []),
+        ...(constraints ?? []),
+      ]);
+
+      setGeneratedConstraints(null);
       setGeneratedConstraints(constraints);
       scrollToBottom();
     } catch (err) {

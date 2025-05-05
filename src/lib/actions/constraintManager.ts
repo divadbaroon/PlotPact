@@ -109,9 +109,13 @@ export async function createConstraint(
   storyContext: string[],
   existingConstraints: Constraint[],
   constraintStructure: ConstraintStructure,
-  constraintCount: number | 1
+  constraintCount: number | 1,
+  allGeneratedConstraints: Constraint[] | null
 ) {
   try {
+
+    console.log(allGeneratedConstraints);
+
     console.log(
       'Processing storyContent:',
       storyContext.length > 0
@@ -159,7 +163,13 @@ export async function createConstraint(
             null,
             2
           )};
+          Also do not include these constraints, they were previously generated and discarded by the user: ${JSON.stringify(
+            allGeneratedConstraints,
+            null,
+            2
+          )};
           Number of Constraints to be generated: ${constraintCount}
+          
           `,
         },
       ],
