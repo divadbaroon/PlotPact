@@ -419,9 +419,6 @@ const ViolationsList: React.FC<{ violationsList: ViolationState[] }> = ({
                 key={j}
                 className='mb-3 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors last:mb-0 hover:bg-red-50'
               >
-                <p className='text-sm font-semibold text-red-700 mb-1'>
-                  {violation.constraintType}
-                </p>
                 <p className='text-sm text-gray-700'>{violation.explanation}</p>
               </div>
             ))}
