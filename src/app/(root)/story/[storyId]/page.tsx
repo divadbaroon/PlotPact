@@ -70,6 +70,8 @@ const ChatInterface: React.FC = () => {
   const [newConstraints, setNewConstraints] = useState<Constraint[]>([]);
 
   const [violationsList, setViolationsList] = useState<ViolationState[]>([]);
+  const [pastViolations, setPastViolations] = useState<ViolationState[]>([]);
+
   const [violations, setViolations] = useState<Violation[]>([]);
 
   const [activeTab, setActiveTab] = useState<'all' | 'new' | 'violations'>('all');
@@ -222,13 +224,12 @@ const ChatInterface: React.FC = () => {
     if (!editableRef.current) return;
     
     const userContent = editableRef.current.value.trim();
-    
     if (!userContent) return;
     
     try {
       // Set to saving state
       setSaveStatus('saving');
-      
+            
       console.log('Verifying content against constraints:', constraints);
       // Verify the content against existing constraints
       const verificationResult = await verifyContent(
@@ -237,57 +238,75 @@ const ChatInterface: React.FC = () => {
         constraints
       );
       console.log('Verification result:', verificationResult);
-    
+      
       if (!verificationResult.isValid) {
+        // Handle violations - add to current violations list
         setViolations(verificationResult.violations);
-    
+        
         const violationWithSpecificContent = verificationResult.violations.map((violation: Violation) => ({
           ...violation,
-          // If violatingContent is provided by the GPT, use it; otherwise default to full content
           violatingContent: violation.violatingContent || userContent
         }));
-    
-        setViolationsList((prev) => [
-          ...prev,
-          {
-            violations: violationWithSpecificContent,
-            // Use the specific violating content if available, otherwise fall back to full content
-            sentContent: violationWithSpecificContent[0]?.violatingContent || userContent,
-          },
-        ]);
-    
-        // Auto-open the constraints panel and switch to violations tab
+        
+        setViolationsList((prev) => {
+          // Store the actual violating content properly
+          const actualViolatingContent = violationWithSpecificContent[0]?.violatingContent || userContent;
+          
+          // Check if this violation already exists in current list
+          const isDuplicate = prev.some(v => v.sentContent === actualViolatingContent);
+          
+          if (isDuplicate) {
+            // Replace the existing violation
+            return prev.map(v => 
+              v.sentContent === actualViolatingContent
+                ? {
+                    violations: violationWithSpecificContent,
+                    sentContent: actualViolatingContent,
+                  }
+                : v
+            );
+          } else {
+            // Add new violation if not duplicate
+            return [...prev, {
+              violations: violationWithSpecificContent,
+              sentContent: actualViolatingContent,
+            }];
+          }
+        });
+        
+        // Auto-open the constraints panel
         setViewConstraintsPanelOpen(true);
         setActiveTab('violations');
         setCreateConstraintPanelOpen(false);
-    
-        // Reset save status on error
+        
         setSaveStatus('idle');
-    
         return;
       }
-    
+      
+      // Content is valid - move any current violations to past
+      if (violationsList.length > 0 && violationsList[0].sentContent !== userContent) {
+        setPastViolations(prev => [...prev, ...violationsList]);
+        setViolationsList([]);
+      }
+      
       setLoading(true);
       setViolations([]);
-    
-      // Add the content directly to the story without streaming
+      
+      // Add the content to the story
       setParas((prev) => [...prev, userContent]);
+      
       setLoading(false);
-    
-      // Set to saved state for 2 seconds
       setSaveStatus('saved');
       setTimeout(() => {
         setSaveStatus('idle');
       }, 2000);
-
-      // Show success toast for constraint passing
+      
+      // Show success toast
       if (constraints.length > 0 && !hideToastPreference) {
         setShowToast(true);
-        const autoHideTimer = setTimeout(() => {
+        setTimeout(() => {
           setShowToast(false);
         }, 5000);
-    
-        return () => clearTimeout(autoHideTimer);
       }
     } catch (error) {
       console.error('Error processing input:', error);
@@ -307,7 +326,6 @@ const ChatInterface: React.FC = () => {
   const handleCloseToast = () => {
     setShowToast(false);
   };
-
 
   const toggleViewConstraints = (): void => {
     setCreateConstraintPanelOpen(false)
@@ -531,6 +549,7 @@ const ChatInterface: React.FC = () => {
               constraints={constraints}
               newConstraints={newConstraints}
               violationsList={violationsList}
+              pastViolations={pastViolations}
               constraintFilter={constraintFilter}
               activeTab={activeTab}
               setActiveTab={(tab) => {
