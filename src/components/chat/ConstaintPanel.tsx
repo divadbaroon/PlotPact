@@ -12,11 +12,12 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
   constraints,
   newConstraints,
   violationsList,
+  pastViolations,
   constraintFilter,
   activeTab,
   setActiveTab,
   setConstraintFilter,
-  onDeleteConstraint,
+  onDeleteConstraint,  
 }) => {
   return (
     <div className='bg-white border rounded-lg shadow-md overflow-hidden'>
@@ -259,7 +260,10 @@ const ConstraintsPanel: React.FC<ConstraintsPanelProps> = ({
         )}
 
         {activeTab === 'violations' && (
-          <ViolationsList violationsList={violationsList} />
+          <ViolationsList 
+            violationsList={violationsList} 
+            pastViolations={pastViolations}
+          />
         )}
       </div>
     </div>
@@ -369,10 +373,13 @@ const NewConstraints: React.FC<{
   );
 };
 
-const ViolationsList: React.FC<{ violationsList: ViolationState[] }> = ({
-  violationsList,
-}) => {
-  if (violationsList.length === 0) {
+const ViolationsList: React.FC<{ 
+  violationsList: ViolationState[], 
+  pastViolations: ViolationState[] 
+}> = ({ violationsList, pastViolations }) => {
+  const hasNoViolations = violationsList.length === 0 && pastViolations.length === 0;
+  
+  if (hasNoViolations) {
     return (
       <div className='text-center py-12 px-8'>
         <div className='bg-gray-50 rounded-lg p-8 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200'>
@@ -390,42 +397,130 @@ const ViolationsList: React.FC<{ violationsList: ViolationState[] }> = ({
     );
   }
 
-  return (
-    <div className='space-y-4'>
-      {violationsList.map((v, i) => (
-        <div
-          key={i}
-          className='border-2 border-red-300 rounded-md bg-red-50 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-red-400'
-        >
-          <div className='p-3 bg-red-100'>
-            <div className='flex items-center gap-2 mb-2'>
-              <AlertCircle className='h-5 w-5 text-red-600' />
-              <p className='font-semibold text-sm text-red-800'>
-                Rejected Input:
-              </p>
-            </div>
-            <p className='text-gray-800 text-sm mt-1 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors'>
-              {v.sentContent}
-            </p>
+  const ViolationCard = ({ v, index }: { v: ViolationState, index: number }) => (
+    <div
+      key={index}
+      className='border-2 border-red-300 rounded-md bg-red-50 overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-red-400'
+    >
+      <div className='p-3 bg-red-100'>
+        <div className='flex items-center gap-2 mb-2'>
+          <AlertCircle className='h-5 w-5 text-red-600' />
+          <p className='font-semibold text-sm text-red-800'>
+            Rejected Input:
+          </p>
+        </div>
+        <p className='text-gray-800 text-sm mt-1 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors'>
+          {v.sentContent}
+        </p>
+      </div>
+      <div className='p-3'>
+        <div className='flex items-center gap-2 mb-2'>
+          <AlertCircle className='h-5 w-5 text-red-600' />
+          <p className='font-semibold text-sm text-red-800'>
+            Violations ({v.violations.length}):
+          </p>
+        </div>
+        {v.violations.map((violation, j) => (
+          <div
+            key={j}
+            className='mb-3 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors last:mb-0 hover:bg-red-50'
+          >
+            <p className='text-sm text-gray-700'>{violation.explanation}</p>
           </div>
-          <div className='p-3'>
-            <div className='flex items-center gap-2 mb-2'>
-              <AlertCircle className='h-5 w-5 text-red-600' />
-              <p className='font-semibold text-sm text-red-800'>
-                Violations ({v.violations.length}):
-              </p>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className='space-y-8'>
+      {/* Current Violations Section */}
+      <div>
+        <div className='flex items-center justify-between mb-4'>
+          <h3 className='text-sm font-semibold text-red-700'>Current Violations</h3>
+          <Badge 
+            variant='destructive' 
+            className='bg-red-600 text-white'
+          >
+            {violationsList.length}
+          </Badge>
+        </div>
+        
+        {violationsList.length === 0 ? (
+          <div className='text-center py-8 px-6'>
+            <div className='bg-green-50 rounded-lg p-6 border border-green-200'>
+              <CheckCircle2 className='h-12 w-12 text-green-400 mx-auto mb-3' />
+              <p className='text-sm text-green-700'>No current violations</p>
+              <p className='text-xs text-green-600 mt-1'>Your recent writing follows all constraints</p>
             </div>
-            {v.violations.map((violation, j) => (
-              <div
-                key={j}
-                className='mb-3 bg-white p-3 rounded border-2 border-red-300 hover:border-red-400 transition-colors last:mb-0 hover:bg-red-50'
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {violationsList.map((v, i) => (
+              <ViolationCard key={i} v={v} index={i} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Past Violations Section */}
+      <div>
+        <div className='flex items-center justify-between mb-4'>
+          <h3 className='text-sm font-semibold text-gray-700'>Past Violations</h3>
+          <Badge 
+            variant='outline' 
+            className='bg-gray-100 text-gray-700'
+          >
+            {pastViolations.length}
+          </Badge>
+        </div>
+        
+        {pastViolations.length === 0 ? (
+          <div className='text-center py-8 px-6'>
+            <div className='bg-gray-50 rounded-lg p-6 border border-gray-200'>
+              <p className='text-sm text-gray-600'>No past violations</p>
+              <p className='text-xs text-gray-500 mt-1'>History will appear here when violations are resolved</p>
+            </div>
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {pastViolations.map((v, i) => (
+              <div 
+                key={i} 
+                className='border-2 border-gray-300 rounded-md bg-gray-50 overflow-hidden opacity-75'
               >
-                <p className='text-sm text-gray-700'>{violation.explanation}</p>
+                <div className='p-3 bg-gray-100'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <AlertCircle className='h-5 w-5 text-gray-500' />
+                    <p className='font-semibold text-sm text-gray-700'>
+                      Past Input:
+                    </p>
+                  </div>
+                  <p className='text-gray-700 text-sm mt-1 bg-white p-3 rounded border-2 border-gray-300'>
+                    {v.sentContent}
+                  </p>
+                </div>
+                <div className='p-3'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <AlertCircle className='h-5 w-5 text-gray-500' />
+                    <p className='font-semibold text-sm text-gray-700'>
+                      Violations ({v.violations.length}):
+                    </p>
+                  </div>
+                  {v.violations.map((violation, j) => (
+                    <div
+                      key={j}
+                      className='mb-3 bg-white p-3 rounded border-2 border-gray-300 transition-colors last:mb-0'
+                    >
+                      <p className='text-sm text-gray-600'>{violation.explanation}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      ))}
+        )}
+      </div>
     </div>
   );
 };
