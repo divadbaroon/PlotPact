@@ -642,17 +642,38 @@ const ChatInterface: React.FC = () => {
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
       >
         <div className='p-4 h-full flex flex-col'>
-          <ConstraintsPanel
-            constraints={constraints}
-            newConstraints={newConstraints}
-            violationsList={violationsList}
-            pastViolations={pastViolations}
-            constraintFilter={constraintFilter}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            setConstraintFilter={setConstraintFilter}
-            onDeleteConstraint={handleDeleteConstraint}
-          />
+          <div className='flex-1 overflow-hidden'>
+            <ConstraintsPanel
+              constraints={constraints}
+              newConstraints={newConstraints}
+              violationsList={violationsList}
+              pastViolations={pastViolations}
+              constraintFilter={constraintFilter}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setConstraintFilter={setConstraintFilter}
+              onDeleteConstraint={handleDeleteConstraint}
+            />
+          </div>
+
+          <div className='mt-4 pt-4 border-t border-gray-200'>
+            <div className='text-sm text-gray-600'>
+              <h4 className='font-medium text-gray-800 mb-1'>
+                Story Consistency Tips:
+              </h4>
+              <ul className='list-disc pl-4 space-y-1'>
+                <li className='hover:text-gray-800 transition-colors duration-200'>
+                  Keep character traits and motivations consistent
+                </li>
+                <li className='hover:text-gray-800 transition-colors duration-200'>
+                  Respect established story elements and settings
+                </li>
+                <li className='hover:text-gray-800 transition-colors duration-200'>
+                  Follow narrative logic and causality
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -667,18 +688,40 @@ const ChatInterface: React.FC = () => {
               <X className='h-5 w-5' />
             </button>
           </div>
-          <div className='p-4'>
-            <ConstraintsPanel
-              constraints={constraints}
-              newConstraints={newConstraints}
-              violationsList={violationsList}
-              pastViolations={pastViolations}
-              constraintFilter={constraintFilter}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              setConstraintFilter={setConstraintFilter}
-              onDeleteConstraint={handleDeleteConstraint}
-            />
+
+          <div className='p-4 h-full flex flex-col'>
+            <div className='flex-1 overflow-hidden'>
+              <ConstraintsPanel
+                constraints={constraints}
+                newConstraints={newConstraints}
+                violationsList={violationsList}
+                pastViolations={pastViolations}
+                constraintFilter={constraintFilter}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                setConstraintFilter={setConstraintFilter}
+                onDeleteConstraint={handleDeleteConstraint}
+              />
+            </div>
+
+            <div className='mt-4 pt-4 border-t border-gray-200'>
+              <div className='text-sm text-gray-600'>
+                <h4 className='font-medium text-gray-800 mb-1'>
+                  Story Consistency Tips:
+                </h4>
+                <ul className='list-disc pl-4 space-y-1'>
+                  <li className='hover:text-gray-800 transition-colors duration-200'>
+                    Keep character traits and motivations consistent
+                  </li>
+                  <li className='hover:text-gray-800 transition-colors duration-200'>
+                    Respect established story elements and settings
+                  </li>
+                  <li className='hover:text-gray-800 transition-colors duration-200'>
+                    Follow narrative logic and causality
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       )}
