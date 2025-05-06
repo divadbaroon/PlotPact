@@ -592,7 +592,7 @@ const ChatInterface: React.FC = () => {
       </div>
 
       {/* side panel */}
-      <div
+      {/* <div
         className={`${
           viewConstraintsPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
@@ -613,8 +613,7 @@ const ChatInterface: React.FC = () => {
               onDeleteConstraint={handleDeleteConstraint}
             />
           </div>
-
-          {/* Additional story guidance */}
+          
           <div className='mt-4 pt-4 border-t border-gray-200'>
             <div className='text-sm text-gray-600'>
               <h4 className='font-medium text-gray-800 mb-1'>
@@ -634,10 +633,58 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
         </div>
+      </div> */}
+
+      {/* === Desktop sidebar === */}
+      <div
+        className={`hidden md:block ${
+          viewConstraintsPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
+        } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
+      >
+        <div className='p-4 h-full flex flex-col'>
+          <ConstraintsPanel
+            constraints={constraints}
+            newConstraints={newConstraints}
+            violationsList={violationsList}
+            pastViolations={pastViolations}
+            constraintFilter={constraintFilter}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setConstraintFilter={setConstraintFilter}
+            onDeleteConstraint={handleDeleteConstraint}
+          />
+        </div>
       </div>
 
+      {/* === Mobile overlay === */}
+      {viewConstraintsPanelOpen && (
+        <div className='md:hidden fixed inset-0 z-50 bg-white overflow-auto transition-all duration-300'>
+          <div className='flex justify-end p-4'>
+            <button
+              onClick={() => setViewConstraintsPanelOpen(false)}
+              className='text-gray-500 hover:text-gray-700'
+            >
+              <X className='h-5 w-5' />
+            </button>
+          </div>
+          <div className='p-4'>
+            <ConstraintsPanel
+              constraints={constraints}
+              newConstraints={newConstraints}
+              violationsList={violationsList}
+              pastViolations={pastViolations}
+              constraintFilter={constraintFilter}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setConstraintFilter={setConstraintFilter}
+              onDeleteConstraint={handleDeleteConstraint}
+            />
+          </div>
+        </div>
+      )}
+
       {/* constraint creator side panel */}
-      <div
+      {/* <div
         className={`${
           createConstraintPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
         } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
@@ -653,7 +700,45 @@ const ChatInterface: React.FC = () => {
             />
           </div>
         </div>
+      </div> */}
+
+      {/* === Desktop constraint creator sidebar === */}
+      <div
+        className={`hidden md:block ${
+          createConstraintPanelOpen ? 'w-96 md:w-[500px] lg:w-[600px]' : 'w-0'
+        } bg-white border-l border-gray-200 transition-all duration-300 overflow-hidden`}
+      >
+        <div className='p-4 h-full flex flex-col'>
+          <ConstraintCreator
+            onAddConstraint={handleAddConstraint}
+            onClose={() => setCreateConstraintPanelOpen(false)}
+            storyContext={paras}
+            existingConstraints={allAddedConstraints}
+          />
+        </div>
       </div>
+
+      {/* === Mobile constraint creator overlay === */}
+      {createConstraintPanelOpen && (
+        <div className='md:hidden fixed inset-0 z-50 bg-white overflow-auto transition-all duration-300'>
+          <div className='flex justify-end p-4'>
+            <button
+              onClick={() => setCreateConstraintPanelOpen(false)}
+              className='text-gray-500 hover:text-gray-700'
+            >
+              <X className='h-5 w-5' />
+            </button>
+          </div>
+          <div className='p-4'>
+            <ConstraintCreator
+              onAddConstraint={handleAddConstraint}
+              onClose={() => setCreateConstraintPanelOpen(false)}
+              storyContext={paras}
+              existingConstraints={allAddedConstraints}
+            />
+          </div>
+        </div>
+      )}
 
       {showToast && (
         <div
