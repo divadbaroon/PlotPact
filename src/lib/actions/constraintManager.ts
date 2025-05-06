@@ -109,9 +109,13 @@ export async function createConstraint(
   storyContext: string[],
   existingConstraints: Constraint[],
   constraintStructure: ConstraintStructure,
-  constraintCount: number | 1
+  constraintCount: number | 1,
+  allGeneratedConstraints: Constraint[] | null
 ) {
   try {
+
+    console.log(allGeneratedConstraints);
+
     console.log(
       'Processing storyContent:',
       storyContext.length > 0
@@ -159,7 +163,13 @@ export async function createConstraint(
             null,
             2
           )};
+          Also do not include these constraints, they were previously generated and discarded by the user: ${JSON.stringify(
+            allGeneratedConstraints,
+            null,
+            2
+          )};
           Number of Constraints to be generated: ${constraintCount}
+          
           `,
         },
       ],
@@ -204,7 +214,7 @@ export async function verifyContent(
 
     const prompt = `Verify if this new content follows established story constraints. The threshold to accept should be very low - if the content fits the story in any reasonable way, it should be accepted.
     
-    Users are free to take the story in different directions and are not bound to follow previous plot developments. Only check that the content respects the broader constraints about setting, time period, and established character traits.
+    Users are free to take the story in different directions and are not bound to follow previous plot developments. Only check that the content respects the constraints broadly.
 
     If a violation is found, identify the specific part of the content that violates the constraint.
 

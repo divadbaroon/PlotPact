@@ -46,6 +46,11 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
   const [generatedConstraints, setGeneratedConstraints] = useState<
     Constraint[] | null
   >(null);
+
+  const [allGeneratedConstraints, setAllGeneratedConstraints] = useState<
+    Constraint[] | null
+  >(null);
+
   const [infoPopover, setInfoPopover] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,17 +90,30 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
       storyContext,
       existingConstraints,
       constraintSpecifics,
-      constraintCount
+      constraintCount,
+      allGeneratedConstraints
     );
   };
 
   const handleGenerateConstraint = async () => {
     if (!functionType || !constraintType || !flexibility) return;
 
-    setGeneratedConstraints(null);
+    // setGeneratedConstraints(null);
     setIsLoading(true);
     try {
       const constraints = await generateConstraints();
+
+      // if (allGeneratedConstraints)
+      // setAllGeneratedConstraints((prev) => [...prev, ...constraints]);
+
+      // setAllGeneratedConstraints((prev) => [...prev, ...(constraints ?? [])]);
+
+      setAllGeneratedConstraints((prev) => [
+        ...(prev ?? []),
+        ...(constraints ?? []),
+      ]);
+
+      setGeneratedConstraints(null);
       setGeneratedConstraints(constraints);
       scrollToBottom();
     } catch (err) {
@@ -117,10 +135,19 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
   };
 
   const handleRegenerateConstraints = async () => {
-    setGeneratedConstraints(null);
+    // setGeneratedConstraints(null);
     setIsLoading(true);
     try {
       const constraints = await generateConstraints();
+
+      // setAllGeneratedConstraints((prev) => [...prev, ...constraints]);
+
+      setAllGeneratedConstraints((prev) => [
+        ...(prev ?? []),
+        ...(constraints ?? []),
+      ]);
+
+      setGeneratedConstraints(null);
       setGeneratedConstraints(constraints);
       scrollToBottom();
     } catch (err) {
@@ -142,9 +169,9 @@ const ConstraintCreator: React.FC<ConstraintCreatorProps> = ({
     !functionType || !constraintType || !flexibility || isLoading;
 
   const infoDescriptions: Record<string, string> = {
-    function: `Focusing: Specifies what must be included — e.g., a theme, event, or arc.\nExclusionary: Specifies what must NOT happen — e.g., avoiding violence or removing a genre.`,
-    type: `Channel: Broad guidance — e.g., must take place in space or the 1800s.\nAnchor: Specific anchors — e.g., a named object, character, or artifact.`,
-    flexibility: `Fixed: Must be followed without changes.\nFaux-Fixed: Appears fixed but can be altered with proper justification.\nFlexible: Open to interpretation and negotiation.`,
+    function: `Focusing : Specifies what must be included in the story. These guide your creativity by pointing you toward particular elements or themes.\n\nExclusionary: Specifies what must not appear in the story. These remove common ideas to push you in new, less obvious directions.`,
+    type: `Anchor: A specific item, phrase, or concept that acts as a creative trigger. Anchors narrow focus and inspire concrete ideas.\n\nChannel: A broad theme or category that shapes story direction. Channels give freedom while guiding narrative style or topic.`,
+    flexibility: `Fixed: This constraint must be strictly followed. It sets a hard rule that defines the creative boundaries.\n\nFlexible: This constraint is more like a suggestion. You can reinterpret or bend it if needed to serve your story.`,
     description: `The main statement of the constraint - what must be followed or avoided.`,
     reason: `Why this constraint is important for the story's consistency.`,
     examples: `Examples help clarify how to follow or not follow the constraint.`,
