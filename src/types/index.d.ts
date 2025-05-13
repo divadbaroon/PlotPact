@@ -140,3 +140,39 @@ export type ObjectivesPanelProps = {
   onToggleObjective: (id: string) => void
   onDeleteObjective: (id: string) => void
 }
+
+export interface ConstraintsSectionProps {
+  onScrollDown: () => void;
+}
+
+export interface FeaturedStoriesSectionProps {
+  onSelectStory: (storyId: string) => void;
+  onScrollDown: () => void;
+}
+
+export interface HeroSectionProps {
+  onStartClick: () => void;
+  onLearnMoreClick: () => void;
+  onScrollDown: () => void;
+}
+
+export interface NavigationDotsProps {
+  sections: string[];
+  activeSection: number;
+  onSelectSection: (index: number) => void;
+}
+
+export interface ProblemSectionProps {
+  onScrollDown: () => void;
+}
+
+export interface ScrollToTopProps {
+  show: boolean;
+  onClick: () => void;
+}
+
+export interface StoryTypeSectionProps {
+  onStartEmptyCanvas: () => void;
+  onUseTemplate: () => void;
+  onScrollDown: () => void;
+}
